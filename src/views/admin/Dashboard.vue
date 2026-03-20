@@ -1,12 +1,20 @@
 <template>
   <div class="dashboard">
+    <!-- Demo Mode Banner -->
+    <div v-if="isDemo" class="demo-banner">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>Demo Mode - {{ demoRoleLabel }} View</span>
+    </div>
+
     <header class="page-header">
       <div>
-        <h1>HR Dashboard</h1>
+        <h1>{{ dashboardTitle }}</h1>
         <p>Monitor your workforce and onboarding pipeline</p>
       </div>
       <div class="header-actions">
-        <router-link to="/admin/candidates" class="btn btn-primary">
+        <router-link v-if="canAddCandidate" to="/admin/candidates" class="btn btn-primary">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
           </svg>
@@ -14,6 +22,15 @@
         </router-link>
       </div>
     </header>
+
+    <!-- Error State -->
+    <div v-if="hasError" class="error-banner">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>{{ errorMessage }}</span>
+      <button @click="retry" class="retry-btn">Retry</button>
+    </div>
 
     <!-- Stats Grid -->
     <div class="stats-grid">
@@ -26,7 +43,7 @@
           </div>
           <span class="stat-trend up">+12%</span>
         </div>
-        <div class="stat-value">{{ stats?.totalCandidates || 24 }}</div>
+        <div class="stat-value">{{ displayStats.totalCandidates }}</div>
         <div class="stat-label">Total Candidates</div>
       </div>
       
@@ -39,7 +56,7 @@
           </div>
           <span class="stat-trend up">+8%</span>
         </div>
-        <div class="stat-value">{{ stats?.activeEmployees || 156 }}</div>
+        <div class="stat-value">{{ displayStats.activeEmployees }}</div>
         <div class="stat-label">Active Employees</div>
       </div>
       
@@ -51,7 +68,7 @@
             </svg>
           </div>
         </div>
-        <div class="stat-value">{{ stats?.pendingApprovals || 8 }}</div>
+        <div class="stat-value">{{ displayStats.pendingApprovals }}</div>
         <div class="stat-label">Pending Approvals</div>
       </div>
       
@@ -63,7 +80,7 @@
             </svg>
           </div>
         </div>
-        <div class="stat-value">{{ stats?.candidatesByState?.in_progress || 12 }}</div>
+        <div class="stat-value">{{ displayStats.inProgress }}</div>
         <div class="stat-label">In Progress</div>
       </div>
     </div>
@@ -76,49 +93,12 @@
           <router-link to="/admin/candidates" class="view-all">View All</router-link>
         </div>
         <div class="status-list">
-          <div v-for="(count, state) in stats?.candidatesByState" :key="state" class="status-item">
+          <div v-for="(item, index) in candidateStatusList" :key="index" class="status-item">
             <div class="status-info">
-              <span class="status-dot" :class="state"></span>
-              <span class="status-label">{{ formatState(state) }}</span>
+              <span class="status-dot" :class="item.class"></span>
+              <span class="status-label">{{ item.label }}</span>
             </div>
-            <span class="status-count">{{ count }}</span>
-          </div>
-          <div v-if="!stats?.candidatesByState" class="empty-state">
-            <div class="status-item">
-              <div class="status-info">
-                <span class="status-dot candidate_created"></span>
-                <span class="status-label">New</span>
-              </div>
-              <span class="status-count">5</span>
-            </div>
-            <div class="status-item">
-              <div class="status-info">
-                <span class="status-dot packet_assigned"></span>
-                <span class="status-label">Assigned</span>
-              </div>
-              <span class="status-count">3</span>
-            </div>
-            <div class="status-item">
-              <div class="status-info">
-                <span class="status-dot in_progress"></span>
-                <span class="status-label">In Progress</span>
-              </div>
-              <span class="status-count">12</span>
-            </div>
-            <div class="status-item">
-              <div class="status-info">
-                <span class="status-dot pending_hr_review"></span>
-                <span class="status-label">Pending Review</span>
-              </div>
-              <span class="status-count">8</span>
-            </div>
-            <div class="status-item">
-              <div class="status-info">
-                <span class="status-dot employee_active"></span>
-                <span class="status-label">Active</span>
-              </div>
-              <span class="status-count">156</span>
-            </div>
+            <span class="status-count">{{ item.count }}</span>
           </div>
         </div>
       </div>
@@ -137,7 +117,7 @@
             </div>
             <div class="action-content">
               <span class="action-title">Review Pending Tasks</span>
-              <span class="action-desc">{{ stats?.pendingApprovals || 8 }} tasks awaiting review</span>
+              <span class="action-desc">{{ displayStats.pendingApprovals }} tasks awaiting review</span>
             </div>
             <svg class="action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -159,7 +139,7 @@
             </svg>
           </router-link>
           
-          <div class="action-item">
+          <div class="action-item" :class="{ 'demo-disabled': isDemo }">
             <div class="action-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -167,7 +147,7 @@
             </div>
             <div class="action-content">
               <span class="action-title">Export Reports</span>
-              <span class="action-desc">Download onboarding data</span>
+              <span class="action-desc">{{ isDemo ? 'Disabled in demo mode' : 'Download onboarding data' }}</span>
             </div>
             <svg class="action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -180,32 +160,124 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue'
+import { ref, computed, onMounted, onErrorCaptured } from 'vue'
 import { useAuthStore } from '../../stores/auth'
-import { useHrDashboardStore } from '../../stores/hrDashboard'
 
 const authStore = useAuthStore()
-const hrStore = useHrDashboardStore()
 
-const stats = computed(() => hrStore.stats)
+// State
+const loading = ref(true)
+const hasError = ref(false)
+const errorMessage = ref('')
+const stats = ref(null)
 
-const formatState = (state) => {
-  const states = {
-    candidate_created: 'New',
-    packet_assigned: 'Assigned',
-    in_progress: 'In Progress',
-    pending_hr_review: 'Pending Review',
-    approved: 'Approved',
-    employee_active: 'Active',
+// Computed
+const isDemo = computed(() => authStore.accessToken?.startsWith('demo-') || authStore.isDemo)
+
+const demoRoleLabel = computed(() => {
+  const labels = {
+    'hr_admin': 'HR Admin',
+    'supervisor': 'Supervisor',
+    'staff': 'Staff',
+    'nurse': 'Nurse',
+    'auditor': 'Auditor',
   }
-  return states[state] || state
+  return labels[authStore.role] || 'Demo'
+})
+
+const dashboardTitle = computed(() => {
+  const titles = {
+    'hr_admin': 'HR Dashboard',
+    'supervisor': 'Supervisor Dashboard',
+    'auditor': 'Auditor Dashboard',
+  }
+  return titles[authStore.role] || 'Admin Dashboard'
+})
+
+const canAddCandidate = computed(() => {
+  return authStore.hasPermission('users.create') && !isDemo.value
+})
+
+// Demo fallback data
+const demoStats = {
+  totalCandidates: 24,
+  activeEmployees: 156,
+  pendingApprovals: 8,
+  inProgress: 12,
+  candidatesByState: {
+    candidate_created: 5,
+    packet_assigned: 3,
+    in_progress: 12,
+    pending_hr_review: 8,
+    approved: 45,
+    employee_active: 156
+  }
 }
 
-onMounted(async () => {
-  const isDemo = authStore.accessToken?.startsWith('demo-')
-  if (!isDemo && authStore.user?.tenantId) {
-    await hrStore.fetchStats(authStore.user.tenantId)
+// Display stats with fallback
+const displayStats = computed(() => {
+  if (stats.value) {
+    return stats.value
   }
+  // Return demo fallback data
+  return demoStats
+})
+
+const candidateStatusList = computed(() => {
+  const states = displayStats.value?.candidatesByState || demoStats.candidatesByState
+  return [
+    { label: 'New', class: 'candidate_created', count: states.candidate_created || 0 },
+    { label: 'Assigned', class: 'packet_assigned', count: states.packet_assigned || 0 },
+    { label: 'In Progress', class: 'in_progress', count: states.in_progress || 0 },
+    { label: 'Pending Review', class: 'pending_hr_review', count: states.pending_hr_review || 0 },
+    { label: 'Active', class: 'employee_active', count: states.employee_active || 0 }
+  ]
+})
+
+// Methods
+const fetchStats = async () => {
+  loading.value = true
+  hasError.value = false
+  errorMessage.value = ''
+
+  try {
+    if (isDemo.value) {
+      // Use demo data
+      stats.value = demoStats
+    } else {
+      // Try to fetch from API
+      const response = await fetch(`/api/dashboard/stats?tenant_id=${authStore.user?.tenantId}`)
+      if (response.ok) {
+        stats.value = await response.json()
+      } else {
+        throw new Error('Failed to fetch dashboard data')
+      }
+    }
+  } catch (error) {
+    console.error('Dashboard load error:', error)
+    hasError.value = true
+    errorMessage.value = 'Failed to load dashboard data. Using demo data.'
+    // Use demo fallback
+    stats.value = demoStats
+  } finally {
+    loading.value = false
+  }
+}
+
+const retry = () => {
+  fetchStats()
+}
+
+// Error boundary
+onErrorCaptured((error) => {
+  console.error('Dashboard error captured:', error)
+  hasError.value = true
+  errorMessage.value = 'An error occurred. Please refresh the page.'
+  return false // Prevent error propagation
+})
+
+onMounted(() => {
+  fetchStats()
 })
 </script>
 
@@ -214,6 +286,56 @@ onMounted(async () => {
   max-width: 1400px;
   margin: 0 auto;
   padding: 2rem;
+}
+
+/* Demo Banner */
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, rgba(66, 184, 131, 0.15), rgba(66, 184, 131, 0.05));
+  border: 1px solid rgba(66, 184, 131, 0.3);
+  color: #42b883;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+}
+
+.demo-banner svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+/* Error Banner */
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #ef4444;
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.error-banner svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
+}
+
+.retry-btn {
+  margin-left: auto;
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.375rem 0.75rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
+  cursor: pointer;
 }
 
 .page-header {
@@ -253,6 +375,12 @@ onMounted(async () => {
 
 .btn-primary:hover {
   background: #359268;
+}
+
+.btn-primary.demo-disabled,
+.btn-primary:disabled {
+  background: #64748b;
+  cursor: not-allowed;
 }
 
 /* Stats Grid */
@@ -423,6 +551,11 @@ onMounted(async () => {
 
 .action-item:hover {
   background: #1e293b;
+}
+
+.action-item.demo-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .action-icon {

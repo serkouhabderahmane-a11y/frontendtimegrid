@@ -1,7 +1,7 @@
 <template>
   <div class="task-form">
     <h4>Document Upload</h4>
-    <p class="hint">Upload required documents (PDF, JPG, PNG)</p>
+    <p class="hint">Upload required documents in PDF format</p>
     <form @submit.prevent="handleSubmit">
       <div class="form-group">
         <label>Document Type</label>
@@ -11,17 +11,27 @@
           <option value="ssn">Social Security Card</option>
           <option value="driver_license">Driver's License</option>
           <option value="work_permit">Work Permit</option>
+          <option value="passport">Passport</option>
+          <option value="certification">Professional Certification</option>
           <option value="other">Other</option>
         </select>
       </div>
       <div class="form-group">
-        <label>Upload File</label>
-        <input type="file" @change="handleFileChange" accept=".pdf,.jpg,.jpeg,.png" />
+        <label>Upload PDF Document</label>
+        <div class="file-upload-box">
+          <input type="file" @change="handleFileChange" accept=".pdf" required />
+          <div class="upload-content">
+            <span class="upload-icon">📄</span>
+            <span class="upload-text">Click to upload PDF</span>
+            <span class="upload-hint">PDF only, max 10MB</span>
+          </div>
+        </div>
       </div>
       <div v-if="formData.fileName" class="file-info">
-        Selected: {{ formData.fileName }}
+        <span class="file-icon">✅</span>
+        <span>Selected: {{ formData.fileName }}</span>
       </div>
-      <button type="submit" :disabled="!formData.fileData">Submit</button>
+      <button type="submit" :disabled="!formData.fileData" class="btn-submit">Upload Document</button>
     </form>
   </div>
 </template>
@@ -55,6 +65,16 @@ onMounted(() => {
 const handleFileChange = (event) => {
   const file = event.target.files[0]
   if (file) {
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed')
+      event.target.value = ''
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      event.target.value = ''
+      return
+    }
     formData.value.fileName = file.name
     const reader = new FileReader()
     reader.onload = (e) => {
@@ -90,7 +110,6 @@ const handleSubmit = () => {
   font-weight: 500;
 }
 
-.form-group input,
 .form-group select {
   width: 100%;
   padding: 0.5rem;
@@ -98,20 +117,80 @@ const handleSubmit = () => {
   border-radius: 4px;
 }
 
+.file-upload-box {
+  position: relative;
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 2rem;
+  text-align: center;
+  transition: border-color 0.2s, background 0.2s;
+}
+
+.file-upload-box:hover {
+  border-color: #2c5282;
+  background: #f7fafc;
+}
+
+.file-upload-box input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.upload-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.upload-icon {
+  font-size: 2rem;
+}
+
+.upload-text {
+  font-weight: 500;
+  color: #2c5282;
+}
+
+.upload-hint {
+  font-size: 0.75rem;
+  color: #718096;
+}
+
 .file-info {
-  padding: 0.5rem;
-  background: #e8f5e9;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  background: #e6fffa;
+  border: 1px solid #38b2ac;
   border-radius: 4px;
   margin-bottom: 1rem;
+  color: #234e52;
+}
+
+.file-icon {
+  font-size: 1.25rem;
 }
 
 button {
-  background: #42b883;
+  background: #2c5282;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;
   border-radius: 4px;
   cursor: pointer;
+  font-weight: 500;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background: #1a365d;
 }
 
 button:disabled {

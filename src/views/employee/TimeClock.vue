@@ -1,5 +1,13 @@
 <template>
   <div class="timeclock-page">
+    <!-- Demo Banner -->
+    <div v-if="isDemo" class="demo-banner">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span>Demo Mode - Clock actions are disabled</span>
+    </div>
+
     <div class="clock-container">
       <div class="clock-card">
         <div class="clock-header">
@@ -99,7 +107,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 import api from '../../api/axios'
 
@@ -110,6 +118,8 @@ const todayEntry = ref(null)
 const entries = ref([])
 const loading = ref(false)
 const error = ref('')
+
+const isDemo = computed(() => authStore.isDemo || authStore.accessToken?.startsWith('demo-'))
 
 let timeInterval
 
@@ -133,15 +143,33 @@ const calculateDuration = (clockIn) => {
 }
 
 const fetchTodayEntry = async () => {
+  // Demo mode - use mock data
+  if (authStore.isDemo || authStore.accessToken?.startsWith('demo-')) {
+    todayEntry.value = null
+    return
+  }
+  
   try {
     const response = await api.get('/time-entries/today')
     todayEntry.value = response.data
   } catch (err) {
     console.error('Failed to fetch today entry:', err)
+    // Fallback to null (no clocked in)
+    todayEntry.value = null
   }
 }
 
 const fetchEntries = async () => {
+  // Demo mode - use mock data
+  if (authStore.isDemo || authStore.accessToken?.startsWith('demo-')) {
+    entries.value = [
+      { id: '1', clockIn: new Date(Date.now() - 86400000).toISOString(), clockOut: new Date(Date.now() - 86400000 + 28800000).toISOString(), totalMinutes: 480 },
+      { id: '2', clockIn: new Date(Date.now() - 172800000).toISOString(), clockOut: new Date(Date.now() - 172800000 + 32400000).toISOString(), totalMinutes: 540 },
+      { id: '3', clockIn: new Date(Date.now() - 259200000).toISOString(), clockOut: new Date(Date.now() - 259200000 + 28800000).toISOString(), totalMinutes: 480 },
+    ]
+    return
+  }
+  
   try {
     const endDate = new Date()
     const startDate = new Date()
@@ -152,13 +180,20 @@ const fetchEntries = async () => {
         endDate: endDate.toISOString(),
       },
     })
-    entries.value = response.data
+    entries.value = response.data || []
   } catch (err) {
     console.error('Failed to fetch entries:', err)
+    entries.value = []
   }
 }
 
 const handleClockIn = async () => {
+  if (authStore.isDemo || authStore.accessToken?.startsWith('demo-')) {
+    error.value = 'Clock in/out is disabled in demo mode'
+    setTimeout(() => error.value = '', 3000)
+    return
+  }
+  
   loading.value = true
   error.value = ''
   try {
@@ -173,6 +208,12 @@ const handleClockIn = async () => {
 }
 
 const handleClockOut = async () => {
+  if (authStore.isDemo || authStore.accessToken?.startsWith('demo-')) {
+    error.value = 'Clock in/out is disabled in demo mode'
+    setTimeout(() => error.value = '', 3000)
+    return
+  }
+  
   loading.value = true
   error.value = ''
   try {
@@ -204,8 +245,25 @@ onUnmounted(() => {
   min-height: calc(100vh - 65px);
   padding: 2rem;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  background: linear-gradient(90deg, rgba(66, 184, 131, 0.15), rgba(66, 184, 131, 0.05));
+  border: 1px solid rgba(66, 184, 131, 0.3);
+  color: #42b883;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1.5rem;
+  font-weight: 500;
+  max-width: 500px;
+  width: 100%;
 }
 
 .clock-container {

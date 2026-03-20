@@ -7,9 +7,9 @@
       <div class="login-brand">
         <div class="brand-content">
           <div class="logo">
-            <svg class="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
+            <div class="logo-icon">
+              <span>TG</span>
+            </div>
             <span>TimeGrid</span>
           </div>
           <h1>Workforce Operations<br/>Simplified</h1>
@@ -21,6 +21,12 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
               </svg>
               <span>Multi-tenant architecture</span>
+            </div>
+            <div class="feature-item">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+              <span>Role-based access control</span>
             </div>
             <div class="feature-item">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -44,6 +50,14 @@
           <h2>Welcome back</h2>
           <p class="form-subtitle">Sign in to your account</p>
           
+          <!-- Demo Mode Banner -->
+          <div v-if="isDemoActive" class="demo-notice">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>Demo mode active - Read-only access</span>
+          </div>
+          
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
               <label for="email">Email</label>
@@ -57,6 +71,7 @@
                   type="email"
                   required
                   placeholder="you@company.com"
+                  :disabled="loading"
                 />
               </div>
             </div>
@@ -73,6 +88,7 @@
                   type="password"
                   required
                   placeholder="••••••••"
+                  :disabled="loading"
                 />
               </div>
             </div>
@@ -85,22 +101,35 @@
           </form>
           
           <div class="divider">
-            <span>or continue with demo</span>
+            <span>or try a demo role</span>
           </div>
           
-          <div class="demo-buttons">
-            <button @click="loginAsHR" class="demo-btn hr">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              <span>Demo HR Admin</span>
-            </button>
-            <button @click="loginAsEmployee" class="demo-btn employee">
-              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-              </svg>
-              <span>Demo Employee</span>
-            </button>
+          <!-- Demo Role Selection -->
+          <div class="demo-roles">
+            <p class="demo-title">Select a demo role to explore:</p>
+            <div class="demo-grid">
+              <button 
+                v-for="demo in demoRoles" 
+                :key="demo.role"
+                @click="handleDemoLogin(demo.role)"
+                class="demo-role-btn"
+                :class="demo.role"
+                :disabled="loading"
+              >
+                <div class="demo-role-icon">{{ demo.icon }}</div>
+                <div class="demo-role-info">
+                  <span class="demo-role-title">{{ demo.title }}</span>
+                  <span class="demo-role-desc">{{ demo.description }}</span>
+                </div>
+              </button>
+            </div>
+          </div>
+          
+          <div class="demo-warning">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+            </svg>
+            <span>Demo sessions are read-only. No changes will be saved.</span>
           </div>
           
           <p class="register-link">
@@ -113,7 +142,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 
@@ -125,6 +154,40 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const isDemoActive = ref(false)
+
+const demoRoles = ref([
+  {
+    role: 'hr_admin',
+    title: 'HR Admin',
+    icon: '👔',
+    description: 'Manage onboarding & training'
+  },
+  {
+    role: 'supervisor',
+    title: 'Supervisor',
+    icon: '👁️',
+    description: 'Review team timesheets'
+  },
+  {
+    role: 'staff',
+    title: 'Staff',
+    icon: '👤',
+    description: 'Clock in/out & notes'
+  },
+  {
+    role: 'nurse',
+    title: 'Nurse',
+    icon: '🏥',
+    description: 'Care & medication'
+  },
+  {
+    role: 'auditor',
+    title: 'Auditor',
+    icon: '📋',
+    description: 'Read-only reports'
+  }
+])
 
 const handleLogin = async () => {
   loading.value = true
@@ -132,52 +195,64 @@ const handleLogin = async () => {
 
   try {
     await authStore.login(email.value, password.value)
-    const redirect = route.query.redirect || '/'
+    const redirect = getDashboardRoute(authStore.role)
     router.push(redirect)
   } catch (err) {
-    error.value = err.response?.data?.message || 'Login failed'
+    error.value = err.message || 'Login failed. Please check your credentials.'
   } finally {
     loading.value = false
   }
 }
 
-const loginAsHR = () => {
-  authStore.$patch({
-    user: {
-      id: 'demo-hr-1',
-      email: 'hr@demo.com',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      role: 'hr',
-      tenantId: 'demo-tenant-1'
-    },
-    accessToken: 'demo-token-hr',
-    refreshToken: 'demo-refresh-hr',
-    isAuthenticated: true
-  })
-  localStorage.setItem('accessToken', 'demo-token-hr')
-  localStorage.setItem('refreshToken', 'demo-refresh-hr')
-  router.push('/admin')
+const handleDemoLogin = async (role) => {
+  loading.value = true
+  error.value = ''
+
+  try {
+    await authStore.demoLogin(role)
+    isDemoActive.value = true
+    const redirect = getDashboardRoute(role)
+    router.push(redirect)
+  } catch (err) {
+    error.value = err.message || 'Demo login failed'
+    isDemoActive.value = false
+  } finally {
+    loading.value = false
+  }
 }
 
-const loginAsEmployee = () => {
-  authStore.$patch({
-    user: {
-      id: 'demo-employee-1',
-      email: 'john@demo.com',
-      firstName: 'John',
-      lastName: 'Smith',
-      role: 'employee',
-      tenantId: 'demo-tenant-1'
-    },
-    accessToken: 'demo-token-employee',
-    refreshToken: 'demo-refresh-employee',
-    isAuthenticated: true
-  })
-  localStorage.setItem('accessToken', 'demo-token-employee')
-  localStorage.setItem('refreshToken', 'demo-refresh-employee')
-  router.push('/employee/timeclock')
+const getDashboardRoute = (role) => {
+  // Map new roles to existing dashboard routes
+  const routes = {
+    'super_admin': '/admin',
+    'tenant_admin': '/admin',
+    'hr_admin': '/admin',
+    'supervisor': '/admin/daily-notes',
+    'staff': '/employee/timeclock',
+    'nurse': '/employee/timeclock',
+    'med_tech': '/employee/timeclock',
+    'auditor': '/admin',
+    // Legacy roles
+    'admin': '/admin',
+    'hr': '/admin',
+    'manager': '/admin/daily-notes',
+    'employee': '/employee/timeclock'
+  }
+  return routes[role] || '/admin'
 }
+
+onMounted(async () => {
+  // Check if demo mode from URL
+  if (route.query.demo) {
+    const demoRole = route.query.demo
+    if (demoRoles.value.some(d => d.role === demoRole)) {
+      await handleDemoLogin(demoRole)
+    }
+  }
+  
+  // Check if returning from demo
+  isDemoActive.value = authStore.isDemo
+})
 </script>
 
 <style scoped>
@@ -233,6 +308,19 @@ const loginAsEmployee = () => {
   margin-bottom: 2rem;
 }
 
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #42b883, #359268);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: white;
+}
+
 .login-brand h1 {
   font-size: 2.5rem;
   font-weight: 800;
@@ -279,7 +367,7 @@ const loginAsEmployee = () => {
 
 .login-form-wrapper {
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
 }
 
 .login-form-wrapper h2 {
@@ -291,7 +379,26 @@ const loginAsEmployee = () => {
 
 .form-subtitle {
   color: #94a3b8;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(66, 184, 131, 0.15);
+  border: 1px solid rgba(66, 184, 131, 0.3);
+  color: #42b883;
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.demo-notice svg {
+  width: 1.25rem;
+  height: 1.25rem;
+  flex-shrink: 0;
 }
 
 .login-form {
@@ -341,6 +448,11 @@ const loginAsEmployee = () => {
 
 .input-wrapper input::placeholder {
   color: #64748b;
+}
+
+.input-wrapper input:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .error-message {
@@ -395,47 +507,104 @@ const loginAsEmployee = () => {
   font-size: 0.875rem;
 }
 
-.demo-buttons {
+/* Demo Roles */
+.demo-roles {
+  margin-bottom: 1rem;
+}
+
+.demo-title {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.demo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem;
 }
 
-.demo-btn {
+@media (max-width: 480px) {
+  .demo-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.demo-role-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.demo-role-btn:hover:not(:disabled) {
+  background: #334155;
+  border-color: #42b883;
+}
+
+.demo-role-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.demo-role-icon {
+  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(66, 184, 131, 0.1);
+  border-radius: 0.5rem;
+}
+
+.demo-role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.demo-role-title {
+  color: #f8fafc;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.demo-role-desc {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+/* Demo Warning */
+.demo-warning {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  color: #fbbf24;
+  padding: 0.625rem;
   border-radius: 0.5rem;
-  font-weight: 500;
-  font-size: 0.875rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  border: 1px solid #334155;
+  font-size: 0.75rem;
+  margin-bottom: 1rem;
 }
 
-.demo-btn.hr {
-  background: #1e293b;
-  color: #e2e8f0;
-}
-
-.demo-btn.hr:hover {
-  background: #334155;
-}
-
-.demo-btn.employee {
-  background: #1e293b;
-  color: #e2e8f0;
-}
-
-.demo-btn.employee:hover {
-  background: #334155;
+.demo-warning svg {
+  width: 1rem;
+  height: 1rem;
+  flex-shrink: 0;
 }
 
 .register-link {
   text-align: center;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   color: #94a3b8;
   font-size: 0.875rem;
 }

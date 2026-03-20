@@ -126,17 +126,124 @@
               </div>
             </div>
 
+            <!-- Offer Letter -->
+            <div v-if="currentTask.task?.type === 'offer_letter'" class="form-section">
+              <div class="form-info" style="background: #fff3cd; border: 1px solid #ffc107;">
+                <strong>Important:</strong> Your offer letter must be signed before continuing with other onboarding tasks.
+              </div>
+              
+              <h3>Offer Letter</h3>
+              <p class="form-desc">Please review your offer letter carefully and sign to confirm your acceptance.</p>
+              
+              <!-- Document Preview -->
+              <div class="document-preview">
+                <div class="doc-header">
+                  <h4>{{ offerLetterData?.title || 'Employment Offer Letter' }}</h4>
+                  <span class="doc-version">Version {{ offerLetterData?.version || '1.0' }}</span>
+                </div>
+                <div class="doc-content offer-letter-content">
+                  <p v-if="offerLetterData?.content">
+                    {{ offerLetterData.content }}
+                  </p>
+                  <p v-else>
+                    <strong>Dear {{ onboarding?.candidate?.firstName || 'Candidate' }},</strong><br/><br/>
+                    We are pleased to offer you the position of <strong>{{ onboarding?.candidate?.position || 'Position Title' }}</strong> 
+                    at <strong>TimeGrid</strong>.<br/><br/>
+                    <strong>Start Date:</strong> {{ onboarding?.candidate?.startDate || 'To be determined' }}<br/>
+                    <strong>Employment Type:</strong> {{ onboarding?.candidate?.employmentType || 'Full-time' }}<br/>
+                    <strong>Location:</strong> {{ onboarding?.candidate?.location || 'To be assigned' }}<br/><br/>
+                    This offer is contingent upon successful completion of background verification and onboarding requirements.<br/><br/>
+                    Please review and sign below to accept this offer.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Electronic Signature -->
+              <div class="form-group signature-section">
+                <label>Electronic Signature *</label>
+                <p class="signature-instruction">Type your full legal name to sign the offer letter</p>
+                <div class="typed-signature-wrapper">
+                  <input 
+                    v-model="formData.offerLetterTypedSignature" 
+                    type="text"
+                    class="typed-signature-input"
+                    placeholder="Type your full legal name here"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="words"
+                    spellcheck="false"
+                  />
+                  
+                </div>
+                <div class="attestation-checkbox">
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      v-model="formData.offerLetterAttestationConfirmed"
+                    />
+                    <span>I confirm that typing my name constitutes my legal electronic signature for the Offer Letter</span>
+                  </label>
+                </div>
+                <p class="legal-text">
+                  <strong>Note:</strong> Your typed name is your electronic signature. No finger drawing or canvas signature is used.
+                </p>
+              </div>
+
+              <!-- Acknowledgement Checkboxes -->
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input v-model="formData.offerLetterRead" type="checkbox" required />
+                  <span>I have read and understood the offer letter *</span>
+                </label>
+              </div>
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input v-model="formData.offerLetterAccepted" type="checkbox" required />
+                  <span>I accept the terms and conditions of employment as outlined in the offer letter *</span>
+                </label>
+              </div>
+            </div>
+
             <!-- Government Forms -->
             <div v-if="currentTask.task?.type === 'government_forms'" class="form-section">
               <h3>Government Tax Forms</h3>
-              <div class="form-group">
+              
+              <!-- Form Status Indicator -->
+              <div class="gov-forms-status-bar">
+                <div v-if="govFormsStatus === 'submitted'" class="status-submitted">
+                  <span class="status-icon">✓</span>
+                  <span class="status-text">Form Submitted – Read Only</span>
+                  <span class="status-detail">Submitted {{ govFormsDraftSaved || 'previously' }}</span>
+                </div>
+                <div v-else-if="govFormsStatus === 'draft'" class="status-draft">
+                  <span v-if="govFormsSaving" class="status-saving">
+                    <span class="saving-spinner"></span>
+                    <span>Saving...</span>
+                  </span>
+                  <span v-else class="status-saved">
+                    <span class="status-icon">💾</span>
+                    <span class="status-text">Draft Saved</span>
+                    <span v-if="govFormsLastSaved" class="status-detail">Last saved: {{ formatSavedTime(govFormsLastSaved) }}</span>
+                  </span>
+                </div>
+                <div v-else class="status-empty">
+                  <span class="status-text">Complete all required fields</span>
+                </div>
+              </div>
+              
+              <!-- Read-only notice for submitted forms -->
+              <div v-if="govFormsStatus === 'submitted'" class="submitted-notice">
+                <strong>Note:</strong> This form has been submitted and cannot be modified. HR will review your submission.
+              </div>
+              
+              <div class="form-group" :class="{ 'readonly-mode': govFormsStatus === 'submitted' }">
                 <label>Form W-4 - Employee's Withholding Certificate</label>
                 <div class="form-subsection">
                   <p class="form-desc">Federal tax withholding form</p>
                   <div class="form-row">
                     <div class="form-group">
                       <label>Filing Status *</label>
-                      <select v-model="formData.w4FilingStatus" required>
+                      <select v-model="formData.w4FilingStatus" @change="scheduleGovFormsAutoSave" :disabled="govFormsStatus === 'submitted'" required>
                         <option value="">Select...</option>
                         <option value="single">Single or Married filing separately</option>
                         <option value="married">Married filing jointly</option>
@@ -145,39 +252,68 @@
                     </div>
                     <div class="form-group">
                       <label>Total Dependents *</label>
-                      <input v-model="formData.w4Dependents" type="number" min="0" required />
+                      <input v-model="formData.w4Dependents" @input="scheduleGovFormsAutoSave" type="number" min="0" :disabled="govFormsStatus === 'submitted'" required />
                     </div>
                   </div>
                   <div class="form-row">
                     <div class="form-group">
                       <label>Other Income</label>
-                      <input v-model="formData.w4OtherIncome" type="number" min="0" />
+                      <input v-model="formData.w4OtherIncome" @input="scheduleGovFormsAutoSave" type="number" min="0" :disabled="govFormsStatus === 'submitted'" />
                     </div>
                     <div class="form-group">
                       <label>Deductions</label>
-                      <input v-model="formData.w4Deductions" type="number" min="0" />
+                      <input v-model="formData.w4Deductions" @input="scheduleGovFormsAutoSave" type="number" min="0" :disabled="govFormsStatus === 'submitted'" />
                     </div>
                   </div>
                   <div class="form-group">
                     <label>Extra Withholding</label>
-                    <input v-model="formData.w4ExtraWithholding" type="number" min="0" />
+                    <input v-model="formData.w4ExtraWithholding" @input="scheduleGovFormsAutoSave" type="number" min="0" :disabled="govFormsStatus === 'submitted'" />
                   </div>
-                  <div class="signature-field">
-                    <label>Signature *</label>
-                    <p class="signature-line">By typing your name, you are signing this form electronically</p>
-                    <input v-model="formData.w4Signature" type="text" placeholder="Type your full legal name" required />
-                    <p class="signature-date">Date: {{ new Date().toLocaleDateString() }}</p>
+                  
+                  <!-- W-4 Electronic Signature (Typed Name Only) -->
+                  <div class="form-group signature-section">
+                    <label>Electronic Signature *</label>
+                    <p class="signature-instruction">Type your name to sign</p>
+                    <div class="typed-signature-wrapper">
+                      <input 
+                        v-model="formData.w4TypedSignature" 
+                        @input="scheduleGovFormsAutoSave"
+                        type="text"
+                        class="typed-signature-input"
+                        :class="{ 'signature-verified': formData.w4TypedSignature && isNameMatch(formData.w4TypedSignature) }"
+                        placeholder="Type your name here"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="words"
+                        spellcheck="false"
+                        :disabled="govFormsStatus === 'submitted'"
+                      />
+                    </div>
+                    <div class="attestation-checkbox">
+                      <label class="checkbox-label">
+                        <input 
+                          type="checkbox" 
+                          v-model="formData.w4AttestationConfirmed"
+                          @change="scheduleGovFormsAutoSave"
+                          :disabled="govFormsStatus === 'submitted'"
+                        />
+                        <span>I confirm that typing my name constitutes my legal electronic signature for Form W-4</span>
+                      </label>
+                    </div>
+                    <p class="legal-text">
+                      <strong>Note:</strong> Your typed name is your electronic signature. No finger drawing or canvas signature is used.
+                    </p>
                   </div>
                 </div>
               </div>
 
-              <div class="form-group mt-4">
+              <div class="form-group mt-4" :class="{ 'readonly-mode': govFormsStatus === 'submitted' }">
                 <label>I-9 - Employment Eligibility Verification</label>
                 <div class="form-subsection">
                   <p class="form-desc">Proof of identity and employment authorization</p>
                   <div class="form-group">
                     <label>Document Type *</label>
-                    <select v-model="formData.i9DocType" required>
+                    <select v-model="formData.i9DocType" @change="scheduleGovFormsAutoSave" :disabled="govFormsStatus === 'submitted'" required>
                       <option value="">Select...</option>
                       <option value="passport">Passport</option>
                       <option value="drivers_license">Driver's License</option>
@@ -188,63 +324,190 @@
                   <div class="form-row">
                     <div class="form-group">
                       <label>Document Number *</label>
-                      <input v-model="formData.i9DocNumber" type="text" required />
+                      <input v-model="formData.i9DocNumber" @input="scheduleGovFormsAutoSave" type="text" :disabled="govFormsStatus === 'submitted'" required />
                     </div>
                       <div class="form-group">
                         <label>Expiration Date (if any)</label>
-                        <DatePicker v-model="formData.i9Expiration" placeholder="Select expiration date" />
+                        <DatePicker v-model="formData.i9Expiration" @update:modelValue="scheduleGovFormsAutoSave" :placeholder="govFormsStatus === 'submitted' ? '' : 'Select expiration date'" :disabled="govFormsStatus === 'submitted'" />
                       </div>
                   </div>
                   <div class="form-group">
                     <label>Citizenship/Immigration Status *</label>
-                    <select v-model="formData.i9Status" required>
+                    <select v-model="formData.i9Status" @change="scheduleGovFormsAutoSave" :disabled="govFormsStatus === 'submitted'" required>
                       <option value="">Select...</option>
                       <option value="citizen">U.S. Citizen</option>
                       <option value="permanent_resident">Permanent Resident</option>
                       <option value="work_auth">Work Authorized</option>
                     </select>
                   </div>
-                  <div class="signature-field">
-                    <label>Signature *</label>
-                    <input v-model="formData.i9Signature" type="text" placeholder="Type your full legal name" required />
-                    <p class="signature-date">Date: {{ new Date().toLocaleDateString() }}</p>
+                  <div class="form-group">
+                    <label>Upload ID Document (PDF) *</label>
+                    <div class="file-upload" :class="{ 'upload-disabled': govFormsStatus === 'submitted' }">
+                      <input type="file" @change="handleI9FileUpload" accept=".pdf" :disabled="govFormsStatus === 'submitted'" />
+                      <div class="upload-icon">📄</div>
+                      <p>Click to upload ID document</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.i9UploadedFile" class="file-preview">
+                      <span class="file-name">📄 {{ formData.i9UploadedFile }}</span>
+                      <span v-if="govFormsStatus !== 'submitted'" class="file-remove" @click="formData.i9UploadedFile = null; formData.i9UploadedFileData = null">×</span>
+                    </div>
+                  </div>
+                  
+                  <!-- I-9 Electronic Signature (Typed Name Only) -->
+                  <div class="form-group signature-section">
+                    <label>Electronic Signature *</label>
+                    <p class="signature-instruction">Type your full legal name exactly as shown above</p>
+                    <div class="typed-signature-wrapper">
+                      <input 
+                        v-model="formData.i9TypedSignature" 
+                        @input="scheduleGovFormsAutoSave"
+                        type="text"
+                        class="typed-signature-input"
+                        :class="{ 'signature-verified': formData.i9TypedSignature && isNameMatch(formData.i9TypedSignature) }"
+                        placeholder="Type your name here"
+                        autocomplete="off"
+                        autocorrect="off"
+                        autocapitalize="words"
+                        spellcheck="false"
+                        :disabled="govFormsStatus === 'submitted'"
+                      />
+                    </div>
+                    <div class="attestation-checkbox">
+                      <label class="checkbox-label">
+                        <input 
+                          type="checkbox" 
+                          v-model="formData.i9AttestationConfirmed"
+                          @change="scheduleGovFormsAutoSave"
+                          :disabled="govFormsStatus === 'submitted'"
+                        />
+                        <span>I confirm that typing my name constitutes my legal electronic signature for Form I-9</span>
+                      </label>
+                    </div>
+                    <p class="legal-text">
+                      <strong>Note:</strong> Your typed name is your electronic signature. No finger drawing or canvas signature is used.
+                    </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Document Upload -->
+              <!-- Document Upload -->
             <div v-if="currentTask.task?.type === 'document_upload'" class="form-section">
+              <div class="form-info" style="background: #e8f5e9; border: 1px solid #4caf50;">
+                <strong>All document uploads are optional.</strong> You may skip this step if you don't have documents to upload. The onboarding will continue without blocking.
+              </div>
+              
               <h3>Document Upload</h3>
-              <div class="form-group">
-                <label>Select Document Type *</label>
-                <select v-model="formData.docType" required>
-                  <option value="">Select...</option>
-                  <option value="id">Government ID</option>
-                  <option value="drivers_license">Driver's License</option>
-                  <option value="passport">Passport</option>
-                  <option value="certification">Professional Certification</option>
-                  <option value="education">Education Diploma</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-              <div class="form-group">
-                <label>Upload File *</label>
-                <div class="file-upload">
-                  <input type="file" @change="handleFileUpload" accept=".pdf,.jpg,.jpeg,.png" required />
-                  <div class="upload-icon">📁</div>
-                  <p>Click to upload or drag and drop</p>
-                  <small>PDF, JPG, or PNG (max 10MB)</small>
+              <p class="form-desc">Upload any supporting documents such as government ID, certifications, or licenses. All uploads are optional.</p>
+              
+              <div class="optional-docs-list">
+                <div class="optional-doc-item">
+                  <div class="doc-type-header">
+                    <span class="doc-type-label">Government ID</span>
+                    <span class="optional-badge">Optional</span>
+                  </div>
+                  <div class="form-group">
+                    <div class="file-upload optional-upload">
+                      <input type="file" @change="handleFileUpload($event, 'government_id')" accept=".pdf" />
+                      <div class="upload-icon">📄</div>
+                      <p>Upload Government ID (PDF)</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.governmentIdFile" class="file-preview">
+                      <span class="file-name">{{ formData.governmentIdFile }}</span>
+                      <span class="file-remove" @click="formData.governmentIdFile = null; formData.governmentIdFileData = null">×</span>
+                    </div>
+                  </div>
                 </div>
-                <div v-if="formData.uploadedFile" class="file-preview">
-                  <span class="file-name">{{ formData.uploadedFile }}</span>
-                  <span class="file-remove" @click="formData.uploadedFile = null">×</span>
+
+                <div class="optional-doc-item">
+                  <div class="doc-type-header">
+                    <span class="doc-type-label">Driver's License</span>
+                    <span class="optional-badge">Optional</span>
+                  </div>
+                  <div class="form-group">
+                    <div class="file-upload optional-upload">
+                      <input type="file" @change="handleFileUpload($event, 'drivers_license')" accept=".pdf" />
+                      <div class="upload-icon">📄</div>
+                      <p>Upload Driver's License (PDF)</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.driversLicenseFile" class="file-preview">
+                      <span class="file-name">{{ formData.driversLicenseFile }}</span>
+                      <span class="file-remove" @click="formData.driversLicenseFile = null; formData.driversLicenseFileData = null">×</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="optional-doc-item">
+                  <div class="doc-type-header">
+                    <span class="doc-type-label">Professional Certification</span>
+                    <span class="optional-badge">Optional</span>
+                  </div>
+                  <div class="form-group">
+                    <div class="file-upload optional-upload">
+                      <input type="file" @change="handleFileUpload($event, 'certification')" accept=".pdf" />
+                      <div class="upload-icon">📄</div>
+                      <p>Upload Certification (PDF)</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.certificationFile" class="file-preview">
+                      <span class="file-name">{{ formData.certificationFile }}</span>
+                      <span class="file-remove" @click="formData.certificationFile = null; formData.certificationFileData = null">×</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="optional-doc-item">
+                  <div class="doc-type-header">
+                    <span class="doc-type-label">Education Diploma</span>
+                    <span class="optional-badge">Optional</span>
+                  </div>
+                  <div class="form-group">
+                    <div class="file-upload optional-upload">
+                      <input type="file" @change="handleFileUpload($event, 'education')" accept=".pdf" />
+                      <div class="upload-icon">📄</div>
+                      <p>Upload Education Diploma (PDF)</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.educationFile" class="file-preview">
+                      <span class="file-name">{{ formData.educationFile }}</span>
+                      <span class="file-remove" @click="formData.educationFile = null; formData.educationFileData = null">×</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="optional-doc-item">
+                  <div class="doc-type-header">
+                    <span class="doc-type-label">Other Documents</span>
+                    <span class="optional-badge">Optional</span>
+                  </div>
+                  <div class="form-group">
+                    <div class="file-upload optional-upload">
+                      <input type="file" @change="handleFileUpload($event, 'other')" accept=".pdf" />
+                      <div class="upload-icon">📄</div>
+                      <p>Upload Other Document (PDF)</p>
+                      <small>PDF only (max 10MB)</small>
+                    </div>
+                    <div v-if="formData.otherFile" class="file-preview">
+                      <span class="file-name">{{ formData.otherFile }}</span>
+                      <span class="file-remove" @click="formData.otherFile = null; formData.otherFileData = null">×</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-              <div class="form-group">
-                <label>Expiration Date (optional)</label>
-                <DatePicker v-model="formData.docExpiration" placeholder="Select expiration date" />
-                <small>Leave blank if document does not expire</small>
+
+              <!-- Uploads Summary -->
+              <div v-if="hasOptionalUploads" class="uploads-summary">
+                <h4>Uploaded Documents ({{ uploadedDocumentsCount }})</h4>
+                <ul>
+                  <li v-if="formData.governmentIdFile">Government ID: {{ formData.governmentIdFile }}</li>
+                  <li v-if="formData.driversLicenseFile">Driver's License: {{ formData.driversLicenseFile }}</li>
+                  <li v-if="formData.certificationFile">Certification: {{ formData.certificationFile }}</li>
+                  <li v-if="formData.educationFile">Education: {{ formData.educationFile }}</li>
+                  <li v-if="formData.otherFile">Other: {{ formData.otherFile }}</li>
+                </ul>
               </div>
             </div>
 
@@ -295,30 +558,193 @@
               </div>
             </div>
 
-            <!-- Training Acknowledgement -->
+            <!-- Training Acknowledgement with Video Requirement -->
             <div v-if="currentTask.task?.type === 'training_acknowledgment'" class="form-section">
               <h3>Training Acknowledgement</h3>
-              <p class="form-desc">Complete the required training courses and acknowledge completion</p>
+              <p class="form-desc">Complete the required training videos and acknowledge completion</p>
               
-              <div class="training-list">
-                <div v-for="(training, idx) in requiredTrainings" :key="idx" class="training-item">
-                  <div class="training-header">
-                    <h4>{{ training.name }}</h4>
-                    <span class="training-status" :class="training.status">{{ training.status }}</span>
+              <!-- Loading State -->
+              <div v-if="trainingLoading" class="training-loading">
+                <div class="spinner"></div>
+                <p>Loading training videos...</p>
+              </div>
+              
+              <!-- Error State -->
+              <div v-else-if="trainingError" class="training-error">
+                <svg class="error-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <p>{{ trainingError }}</p>
+                <button @click="fetchTrainingVideos(currentTask.taskId)" class="btn-retry">Retry</button>
+              </div>
+              
+              <!-- No Videos State -->
+              <div v-else-if="trainingVideos.length === 0" class="training-empty">
+                <svg class="empty-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                </svg>
+                <p>No training videos assigned</p>
+                <small>Contact HR if you believe this is an error.</small>
+              </div>
+              
+              <!-- Training Content -->
+              <template v-else>
+                <!-- Training Progress Summary -->
+                <div class="training-progress-summary">
+                  <div class="progress-header">
+                    <span>Your Progress</span>
+                    <span>{{ completedVideosCount }} / {{ requiredVideosCount }} required videos</span>
                   </div>
-                  <p>{{ training.description }}</p>
-                  <div class="form-group">
-                    <label>Completion Date *</label>
-                    <DatePicker v-model="formData[`training_${idx}_date`]" placeholder="Select completion date" />
+                  <div class="progress-bar">
+                    <div class="progress-fill" :style="{ width: trainingProgressPercent + '%' }"></div>
                   </div>
-                  <div class="form-group">
-                    <label>Certificate Upload (optional)</label>
-                    <input type="file" accept=".pdf,.jpg,.png" />
+                  <div v-if="allRequiredVideosCompleted" class="progress-ready">
+                    ✓ All required videos completed. You can now acknowledge the training.
                   </div>
-                  <div class="signature-field">
-                    <label>Acknowledge Completion *</label>
-                    <input v-model="formData[`training_${idx}_signature`]" type="text" placeholder="Type your name to acknowledge" required />
+                  <div v-else class="progress-waiting">
+                    Complete all required videos (*) to unlock acknowledgement.
                   </div>
+                </div>
+
+                <!-- Video List -->
+                <div class="video-list">
+                  <div v-for="(video, idx) in trainingVideos" :key="video.id" class="video-item" :class="{ 'video-active': idx === currentVideoIndex }">
+                    <div class="video-thumbnail" @click="selectTrainingVideo(idx)">
+                      <span v-if="video.progress?.is_completed" class="thumbnail-check">✓</span>
+                      <span v-else-if="idx === currentVideoIndex && videoPlaying" class="thumbnail-play playing">▶</span>
+                      <span v-else class="thumbnail-play">▶</span>
+                    </div>
+                    <div class="video-info">
+                      <div class="video-title" @click="selectTrainingVideo(idx)">
+                        {{ idx + 1 }}. {{ video.title }}
+                        <span v-if="video.is_required" class="required-badge">*</span>
+                      </div>
+                      <div class="video-duration">Duration: {{ formatVideoTime(video.duration_seconds) }}</div>
+                      <div class="video-progress-bar">
+                        <div class="video-progress-fill" 
+                          :style="{ width: (video.progress?.completion_percentage || 0) + '%' }"
+                          :class="{ 'progress-complete': video.progress?.is_completed }"></div>
+                      </div>
+                      <div class="video-status">
+                        {{ video.progress?.is_completed ? '✓ Completed' : 
+                           (video.progress?.completion_percentage > 0 ? (video.progress?.completion_percentage || 0) + '% complete' : 'Not started') }}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Current Video Player -->
+                <div v-if="currentTrainingVideo" class="current-video">
+                  <div class="now-playing">Now Playing</div>
+                  <div class="video-name">{{ currentTrainingVideo.title }}</div>
+                  <div v-if="currentTrainingVideo.description" class="video-description">
+                    {{ currentTrainingVideo.description }}
+                  </div>
+                  
+                  <!-- Self-Hosted Video Player (HTML5) -->
+                  <div v-if="isSelfHostedVideo(currentTrainingVideo)" class="video-player">
+                    <video 
+                      ref="videoElement"
+                      :src="getVideoSource(currentTrainingVideo)"
+                      :poster="currentTrainingVideo.thumbnail_url"
+                      @loadedmetadata="onVideoLoaded"
+                      @timeupdate="onVideoTimeUpdate"
+                      @play="onVideoPlay"
+                      @pause="onVideoPause"
+                      @ended="onVideoEnded"
+                      @seeking="onVideoSeeking"
+                      controls
+                      preload="metadata"
+                      class="html5-video-player"
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  
+                  <!-- External/Embed Video Player (Fallback) -->
+                  <div v-else class="video-player">
+                    <div class="player-overlay">
+                      <div class="player-placeholder" :class="{ 'video-completed': currentTrainingVideo.progress?.is_completed }">
+                        <div v-if="currentTrainingVideo.progress?.is_completed" class="completed-overlay">
+                          <span class="check-big">✓</span>
+                          <p>Video Completed</p>
+                        </div>
+                        <div v-else class="video-controls">
+                          <button @click="toggleVideoPlayback" class="play-btn" :class="{ playing: videoPlaying }">
+                            {{ videoPlaying ? '⏸' : '▶' }}
+                          </button>
+                          <p class="player-text">{{ videoPlaying ? 'Playing...' : 'Click to Watch' }}</p>
+                          <p class="player-subtext">Progress will be saved automatically</p>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="video-progress-overlay">
+                      <div class="progress-track">
+                        <div class="progress-indicator" 
+                          :style="{ width: (currentTrainingVideo.progress?.completion_percentage || 0) + '%' }"
+                          :class="{ 'indicator-complete': currentTrainingVideo.progress?.is_completed }"></div>
+                      </div>
+                      <div class="progress-info">
+                        <span>{{ currentTrainingVideo.progress?.completion_percentage || 0 }}% watched</span>
+                        <span>{{ formatVideoTime(currentTrainingVideo.progress?.watched_seconds || 0) }} / {{ formatVideoTime(currentTrainingVideo.duration_seconds) }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Video Progress Bar -->
+                  <div class="video-progress-bar-external">
+                    <div class="progress-track">
+                      <div class="progress-indicator" 
+                        :style="{ width: (currentTrainingVideo.progress?.completion_percentage || 0) + '%' }"
+                        :class="{ 'indicator-complete': currentTrainingVideo.progress?.is_completed }"></div>
+                    </div>
+                    <div class="progress-info">
+                      <span>{{ currentTrainingVideo.progress?.completion_percentage || 0 }}% watched</span>
+                      <span>{{ formatVideoTime(currentTrainingVideo.progress?.watched_seconds || 0) }} / {{ formatVideoTime(currentTrainingVideo.duration_seconds) }}</span>
+                    </div>
+                  </div>
+
+                  <div v-if="currentTrainingVideo.is_required" class="video-required-notice">
+                    {{ currentTrainingVideo.progress?.is_completed 
+                      ? '✓ This required video is complete' 
+                      : `You must watch ${currentTrainingVideo.completion_threshold || 95}% of this video to complete` }}
+                  </div>
+
+                  <div v-if="currentTrainingVideo.progress?.is_completed" class="video-completed-badge">
+                    ✓ Video Completed
+                  </div>
+
+                  <!-- Anti-cheat notice -->
+                  <div class="anticheat-notice">
+                    <strong>Note:</strong> Completion requires watching at least {{ currentTrainingVideo.completion_threshold || 95 }}% of the video. Progress is automatically saved.
+                  </div>
+                </div>
+              </template>
+
+              <!-- Acknowledge Section -->
+              <div class="acknowledge-section" :class="{ 'ready': allRequiredVideosCompleted }">
+                <div class="signature-field">
+                  <label>Acknowledge Completion *</label>
+                  <input 
+                    v-model="formData.trainingSignature" 
+                    type="text" 
+                    placeholder="Type your full legal name to acknowledge" 
+                    :disabled="!allRequiredVideosCompleted"
+                    required 
+                  />
+                  <p class="signature-date">Date: {{ new Date().toLocaleDateString() }} | IP: {{ userIP }}</p>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input v-model="formData.trainingAccepted" type="checkbox" :disabled="!allRequiredVideosCompleted" required />
+                    <span>I confirm that I have completed all required training videos *</span>
+                  </label>
+                </div>
+                <div class="form-group">
+                  <label class="checkbox-label">
+                    <input v-model="formData.trainingAgreed" type="checkbox" :disabled="!allRequiredVideosCompleted" required />
+                    <span>I understand the training materials and agree to comply with company policies *</span>
+                  </label>
                 </div>
               </div>
             </div>
@@ -367,27 +793,34 @@
                 </div>
               </div>
 
-              <div class="form-group mt-4">
-                <label>Draw Your Signature *</label>
-                <canvas 
-                  ref="signatureCanvas" 
-                  class="signature-pad"
-                  @mousedown="startDrawing"
-                  @mousemove="draw"
-                  @mouseup="stopDrawing"
-                  @mouseleave="stopDrawing"
-                  @touchstart.prevent="startDrawingTouch"
-                  @touchmove.prevent="drawTouch"
-                  @touchend.prevent="stopDrawing"
-                ></canvas>
-                <button type="button" @click="clearSignature" class="btn-clear">Clear Signature</button>
-              </div>
-
-              <div class="signature-field">
-                <label>Type Your Full Legal Name *</label>
-                <input v-model="formData.eSignTypedName" type="text" placeholder="Type your full legal name" required />
-                <p class="signature-date">Date: {{ new Date().toLocaleDateString() }}</p>
-                <p class="legal-text">By signing above, I acknowledge that I have read, understand, and agree to the document</p>
+              <div class="form-group signature-section">
+                <label>Electronic Signature *</label>
+                <p class="signature-instruction">Type your name to sign</p>
+                <div class="typed-signature-wrapper">
+                  <input 
+                    v-model="formData.typedSignature" 
+                    type="text"
+                    class="typed-signature-input"
+                    placeholder="Type your name here"
+                    autocomplete="off"
+                    autocorrect="off"
+                    autocapitalize="words"
+                    spellcheck="false"
+                  />
+                 
+                </div>
+                <div class="attestation-checkbox">
+                  <label class="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      v-model="formData.attestationConfirmed"
+                    />
+                    <span>I confirm that typing my name constitutes my legal electronic signature</span>
+                  </label>
+                </div>
+                <p class="legal-text">
+                  <strong>Note:</strong> Your typed name is your electronic signature. No finger drawing or canvas signature is used.
+                </p>
               </div>
             </div>
 
@@ -460,7 +893,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '../../api/axios'
 import DatePicker from '../../components/DatePicker.vue'
@@ -474,13 +907,34 @@ const currentTaskIndex = ref(0)
 const submitting = ref(false)
 const policyScroll = ref(null)
 const policyContentHeight = ref(0)
-const signatureCanvas = ref(null)
 const showConfirmation = ref(false)
 const submittedTask = ref(null)
-let isDrawing = false
-let ctx = null
+
+// Audit logging
+const auditLog = []
+
+const logAuditEvent = (action, details = {}) => {
+  const event = {
+    timestamp: new Date().toISOString(),
+    action,
+    taskId: currentTask.value?.taskId,
+    taskType: currentTask.value?.task?.type,
+    ...details
+  }
+  auditLog.push(event)
+  console.log('[Audit]', event)
+}
+
+// Typed signature refs
+const typedSignature = ref('')
+const w4TypedSignature = ref('')
+const i9TypedSignature = ref('')
+
+// Offer letter data
+const offerLetterData = ref(null)
 
 const STORAGE_KEY = 'onboarding_demo_data'
+const CURRENT_STEP_KEY = 'onboarding_current_step'
 
 const loadSavedData = () => {
   try {
@@ -502,6 +956,25 @@ const saveData = (data) => {
   }
 }
 
+const saveCurrentStep = (stepIndex) => {
+  try {
+    localStorage.setItem(CURRENT_STEP_KEY, JSON.stringify({
+      stepIndex,
+      timestamp: new Date().toISOString()
+    }))
+  } catch (e) {}
+}
+
+const loadCurrentStep = () => {
+  try {
+    const saved = localStorage.getItem(CURRENT_STEP_KEY)
+    if (saved) {
+      return JSON.parse(saved)
+    }
+  } catch (e) {}
+  return null
+}
+
 const getSavedFormData = (taskId, taskType) => {
   const saved = loadSavedData()
   if (saved && saved[taskId]) {
@@ -513,13 +986,442 @@ const getSavedFormData = (taskId, taskType) => {
 const userIP = ref('192.168.1.1')
 
 const formData = ref({})
-const isCanvasBlank = ref(true)
 
-const requiredTrainings = [
-  { name: 'Workplace Safety Training', description: 'Learn about workplace safety protocols', status: 'pending' },
-  { name: 'Harassment Prevention', description: 'Anti-harassment training', status: 'pending' },
-  { name: 'Data Security Training', description: 'How to handle sensitive data', status: 'pending' }
-]
+// Training video state
+const trainingVideos = ref([])
+const currentVideoIndex = ref(0)
+const trainingLoading = ref(false)
+const trainingError = ref(null)
+const videoPlaying = ref(false)
+const videoSimInterval = ref(null)
+const hasLoadedVideos = ref(false)
+
+// Progress storage key
+const TRAINING_PROGRESS_KEY = 'onboarding_training_progress'
+
+// Government Forms State
+const govFormsStatus = ref('empty') // 'empty' | 'draft' | 'submitted'
+const govFormsDraftSaved = ref(null)
+const govFormsSaving = ref(false)
+const govFormsVersion = ref('1.0')
+const govFormsLastSaved = ref(null)
+let govFormsAutoSaveTimer = null
+
+const currentTrainingVideo = computed(() => {
+  return trainingVideos.value[currentVideoIndex.value] || null
+})
+
+const completedVideosCount = computed(() => {
+  return trainingVideos.value.filter(v => v.is_required && v.progress?.is_completed).length
+})
+
+const requiredVideosCount = computed(() => {
+  return trainingVideos.value.filter(v => v.is_required).length
+})
+
+const trainingProgressPercent = computed(() => {
+  if (requiredVideosCount.value === 0) return 0
+  return Math.round((completedVideosCount.value / requiredVideosCount.value) * 100)
+})
+
+const allRequiredVideosCompleted = computed(() => {
+  return requiredVideosCount.value > 0 && completedVideosCount.value >= requiredVideosCount.value
+})
+
+const hasOptionalUploads = computed(() => {
+  return formData.value.governmentIdFile || 
+         formData.value.driversLicenseFile || 
+         formData.value.certificationFile || 
+         formData.value.educationFile || 
+         formData.value.otherFile
+})
+
+const uploadedDocumentsCount = computed(() => {
+  let count = 0
+  if (formData.value.governmentIdFile) count++
+  if (formData.value.driversLicenseFile) count++
+  if (formData.value.certificationFile) count++
+  if (formData.value.educationFile) count++
+  if (formData.value.otherFile) count++
+  return count
+})
+
+const formatVideoTime = (seconds) => {
+  if (!seconds) return '0:00'
+  const mins = Math.floor(seconds / 60)
+  const secs = Math.floor(seconds % 60)
+  return `${mins}:${secs.toString().padStart(2, '0')}`
+}
+
+const videoElement = ref(null)
+
+// Check if video is self-hosted (uploaded to TimeGrid)
+const isSelfHostedVideo = (video) => {
+  if (!video) return false
+  if (video.video_source === 'uploaded' || video.video_source === 'stream') return true
+  if (video.video_url?.startsWith('/api/videos') || video.video_url?.startsWith('local:')) return true
+  if (video.video_url?.includes('youtube.com') || video.video_url?.includes('vimeo.com')) return false
+  if (video.video_url?.startsWith('http')) return false
+  return false
+}
+
+// Get video source URL for HTML5 player
+const getVideoSource = (video) => {
+  if (!video) return ''
+  if (video.video_url?.startsWith('/api/videos')) {
+    return video.video_url
+  }
+  if (video.video_url?.startsWith('local:')) {
+    const parts = video.video_url.split(':')[1]?.split('/')
+    if (parts?.length >= 2) {
+      return `/api/videos/stream/${parts[0]}/${parts[1]}`
+    }
+  }
+  return video.video_url || ''
+}
+
+// HTML5 Video event handlers - THESE DO NOT NAVIGATE
+const onVideoLoaded = (event) => {
+  const video = event.target
+  if (video && currentTrainingVideo.value) {
+    const duration = Math.floor(video.duration)
+    if (duration > 0 && currentTrainingVideo.value.duration_seconds !== duration) {
+      currentTrainingVideo.value.duration_seconds = duration
+    }
+    const lastPosition = currentTrainingVideo.value.progress?.last_position_seconds || 0
+    if (lastPosition > 0 && lastPosition < video.duration - 5) {
+      video.currentTime = lastPosition
+    }
+    logAuditEvent('VIDEO_LOADED', { videoId: currentTrainingVideo.value.id })
+  }
+}
+
+const onVideoTimeUpdate = (event) => {
+  const video = event.target
+  if (!video || !currentTrainingVideo.value) return
+  
+  const currentTime = Math.floor(video.currentTime)
+  const duration = Math.floor(video.duration)
+  const watchedSeconds = currentTrainingVideo.value.progress?.watched_seconds || 0
+  
+  if (currentTime > watchedSeconds) {
+    const completionPct = duration > 0 ? Math.round((currentTime / duration) * 100) : 0
+    updateVideoProgress(currentTrainingVideo.value.id, currentTime, currentTime, completionPct)
+  }
+}
+
+const onVideoPlay = () => {
+  videoPlaying.value = true
+  logAuditEvent('VIDEO_STARTED', { videoId: currentTrainingVideo.value?.id })
+}
+
+const onVideoPause = () => {
+  videoPlaying.value = false
+  logAuditEvent('VIDEO_PAUSED', { videoId: currentTrainingVideo.value?.id })
+}
+
+const onVideoEnded = () => {
+  videoPlaying.value = false
+  if (currentTrainingVideo.value) {
+    const duration = Math.floor(videoElement.value?.duration || currentTrainingVideo.value.duration_seconds)
+    const completionPct = 100
+    updateVideoProgress(currentTrainingVideo.value.id, duration, duration, completionPct)
+    logAuditEvent('VIDEO_COMPLETED', { 
+      videoId: currentTrainingVideo.value.id,
+      duration
+    })
+  }
+}
+
+const onVideoSeeking = () => {
+  logAuditEvent('VIDEO_SEEKING', { 
+    position: videoElement.value?.currentTime 
+  })
+}
+
+const loadTrainingProgress = () => {
+  try {
+    const saved = localStorage.getItem(TRAINING_PROGRESS_KEY)
+    if (saved) return JSON.parse(saved)
+  } catch (e) {}
+  return {}
+}
+
+const saveTrainingProgress = (progress) => {
+  try {
+    localStorage.setItem(TRAINING_PROGRESS_KEY, JSON.stringify(progress))
+  } catch (e) {}
+}
+
+const updateVideoProgress = async (videoId, currentPosition, watchedDuration, completionPct) => {
+  const progress = loadTrainingProgress()
+  const video = trainingVideos.value.find(v => v.id === videoId)
+  
+  if (video) {
+    const threshold = video.completion_threshold || 95
+    const isCompleted = completionPct >= threshold
+    
+    progress[videoId] = {
+      watched_seconds: watchedDuration,
+      completion_percentage: completionPct,
+      is_completed: isCompleted,
+      completed_at: isCompleted ? new Date().toISOString() : null,
+      last_position: currentPosition,
+    }
+    saveTrainingProgress(progress)
+    
+    const idx = trainingVideos.value.findIndex(v => v.id === videoId)
+    if (idx >= 0) {
+      trainingVideos.value[idx].progress = {
+        ...trainingVideos.value[idx].progress,
+        ...progress[videoId]
+      }
+    }
+    
+    console.log('[Training] Progress saved:', videoId, completionPct + '%')
+  }
+}
+
+const fetchTrainingVideos = async (trainingId) => {
+  trainingLoading.value = true
+  trainingError.value = null
+  trainingVideos.value = []
+  hasLoadedVideos.value = false
+  
+  try {
+    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
+    let response
+    
+    if (isDemo) {
+      response = await api.get(`/onboarding/training/${trainingId}/videos`)
+    } else {
+      response = await api.get(`/onboarding/training/${trainingId}/videos`)
+    }
+    
+    if (response.data) {
+      const savedProgress = loadTrainingProgress()
+      
+      const videosWithProgress = (response.data.videos || []).map(video => ({
+        ...video,
+        progress: savedProgress[video.id] || video.progress || {
+          watched_seconds: 0,
+          total_seconds: video.duration_seconds || 0,
+          completion_percentage: 0,
+          is_completed: false,
+          completed_at: null,
+        }
+      }))
+      
+      trainingVideos.value = videosWithProgress
+      hasLoadedVideos.value = true
+      
+      if (videosWithProgress.length === 0) {
+        trainingError.value = 'No training videos have been assigned. Please contact HR.'
+      }
+      
+      console.log('[Training] Loaded', videosWithProgress.length, 'videos')
+      logAuditEvent('TRAINING_VIDEOS_LOADED', { 
+        count: videosWithProgress.length,
+        trainingId 
+      })
+    }
+  } catch (err) {
+    console.error('Failed to fetch training videos:', err)
+    trainingError.value = 'Failed to load training videos. Please try again.'
+    
+    if (localStorage.getItem('accessToken')?.startsWith('demo-')) {
+      trainingVideos.value = getDemoFallbackVideos()
+      hasLoadedVideos.value = true
+    }
+  } finally {
+    trainingLoading.value = false
+  }
+}
+
+const getDemoFallbackVideos = () => {
+  return [
+    {
+      id: 'demo-vid-1',
+      title: 'Workplace Safety Fundamentals',
+      description: 'Learn essential workplace safety protocols and emergency procedures.',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      video_source: 'url',
+      duration_seconds: 600,
+      is_required: true,
+      completion_threshold: 95,
+      progress: { watched_seconds: 0, completion_percentage: 0, is_completed: false }
+    },
+    {
+      id: 'demo-vid-2',
+      title: 'Harassment Prevention Training',
+      description: 'Understanding and preventing workplace harassment.',
+      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
+      video_source: 'url',
+      duration_seconds: 1200,
+      is_required: true,
+      completion_threshold: 95,
+      progress: { watched_seconds: 0, completion_percentage: 0, is_completed: false }
+    },
+  ]
+}
+
+const simulateVideoWatch = () => {
+  const video = currentTrainingVideo.value
+  if (!video) return
+  
+  const currentProgress = video.progress?.completion_percentage || 0
+  const threshold = video.completion_threshold || 95
+  
+  if (currentProgress >= threshold) {
+    stopVideoSimulation()
+    return
+  }
+  
+  const newProgress = Math.min(threshold, currentProgress + 5)
+  const watchedSeconds = Math.floor((newProgress / 100) * video.duration_seconds)
+  
+  updateVideoProgress(video.id, watchedSeconds, watchedSeconds, newProgress)
+  
+  if (newProgress >= threshold) {
+    stopVideoSimulation()
+    logAuditEvent('VIDEO_COMPLETED', { videoId: video.id, title: video.title })
+  }
+}
+
+const startVideoSimulation = () => {
+  if (videoSimInterval.value) return
+  videoPlaying.value = true
+  videoSimInterval.value = setInterval(simulateVideoWatch, 2000)
+  logAuditEvent('VIDEO_STARTED', { videoId: currentTrainingVideo.value?.id })
+}
+
+const stopVideoSimulation = () => {
+  if (videoSimInterval.value) {
+    clearInterval(videoSimInterval.value)
+    videoSimInterval.value = null
+  }
+  videoPlaying.value = false
+}
+
+const toggleVideoPlayback = () => {
+  if (videoPlaying.value) {
+    stopVideoSimulation()
+  } else {
+    startVideoSimulation()
+  }
+}
+
+const fetchOfferLetterData = async () => {
+  try {
+    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
+    if (isDemo) {
+      offerLetterData.value = {
+        title: 'Employment Offer Letter',
+        version: '1.0',
+        content: null
+      }
+    } else {
+      const response = await api.get(`/onboarding/${onboarding.value?.id}/offer-letter`)
+      if (response.data) {
+        offerLetterData.value = response.data
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch offer letter:', err)
+  }
+}
+
+// Government Forms Persistence Functions
+const fetchGovFormsStatus = async () => {
+  try {
+    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
+    if (isDemo) {
+      const response = await api.get('/onboarding/government-forms/draft')
+      const result = response.data
+      
+      govFormsStatus.value = result.status
+      govFormsVersion.value = result.version || '1.0'
+      
+      if (result.status === 'draft' && result.draft) {
+        // Load saved draft into form
+        formData.value = { ...formData.value, ...result.draft }
+        govFormsDraftSaved.value = result.savedAt
+        govFormsLastSaved.value = result.draft.savedAt
+        console.log('[Gov Forms] Loaded draft from server')
+      } else if (result.status === 'submitted' && result.snapshot) {
+        // Load submitted snapshot (read-only mode)
+        formData.value = { ...formData.value, ...result.snapshot }
+        console.log('[Gov Forms] Loaded submitted snapshot')
+      } else {
+        console.log('[Gov Forms] No existing data found')
+      }
+    }
+  } catch (err) {
+    console.error('Failed to fetch government forms status:', err)
+  }
+}
+
+const saveGovFormsDraft = async (showNotification = true) => {
+  if (govFormsSaving.value) return
+  if (govFormsStatus.value === 'submitted') return
+  
+  govFormsSaving.value = true
+  try {
+    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
+    if (isDemo) {
+      const draftData = {
+        w4FilingStatus: formData.value.w4FilingStatus,
+        w4Dependents: formData.value.w4Dependents,
+        w4OtherIncome: formData.value.w4OtherIncome,
+        w4Deductions: formData.value.w4Deductions,
+        w4ExtraWithholding: formData.value.w4ExtraWithholding,
+        w4TypedSignature: formData.value.w4TypedSignature,
+        w4AttestationConfirmed: formData.value.w4AttestationConfirmed,
+        i9DocType: formData.value.i9DocType,
+        i9DocNumber: formData.value.i9DocNumber,
+        i9Expiration: formData.value.i9Expiration,
+        i9Status: formData.value.i9Status,
+        i9TypedSignature: formData.value.i9TypedSignature,
+        i9AttestationConfirmed: formData.value.i9AttestationConfirmed,
+        i9UploadedFile: formData.value.i9UploadedFile,
+        i9UploadedFileData: formData.value.i9UploadedFileData,
+      }
+      
+      const response = await api.post('/onboarding/government-forms/draft', draftData)
+      
+      if (response.data.success) {
+        govFormsStatus.value = 'draft'
+        govFormsDraftSaved.value = new Date().toISOString()
+        govFormsLastSaved.value = new Date().toISOString()
+        logAuditEvent('GOV_FORMS_DRAFT_SAVED', { savedAt: govFormsDraftSaved.value })
+        
+        if (showNotification) {
+          console.log('[Gov Forms] Draft saved successfully')
+        }
+      }
+    }
+  } catch (err) {
+    console.error('Failed to save government forms draft:', err)
+  } finally {
+    govFormsSaving.value = false
+  }
+}
+
+const scheduleGovFormsAutoSave = () => {
+  if (govFormsAutoSaveTimer) {
+    clearTimeout(govFormsAutoSaveTimer)
+  }
+  govFormsAutoSaveTimer = setTimeout(() => {
+    saveGovFormsDraft(false)
+  }, 2000)
+}
+
+const selectTrainingVideo = (index) => {
+  if (index >= 0 && index < trainingVideos.value.length) {
+    currentVideoIndex.value = index
+    stopVideoSimulation()
+  }
+}
 
 const currentTask = computed(() => {
   if (currentTaskIndex.value === null || currentTaskIndex.value < 0) return null
@@ -541,16 +1443,27 @@ const isDemoMode = computed(() => {
 const resetDemo = () => {
   if (confirm('Are you sure you want to reset all your progress?')) {
     localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(TRAINING_PROGRESS_KEY)
+    localStorage.removeItem(CURRENT_STEP_KEY)
     window.location.reload()
   }
 }
 
 const canAccessTask = (index) => {
-  // Allow access to the first task or any task that has been submitted
+  const task = taskStatuses.value[index]
+  
   if (index === 0) return true
+  
+  if (task.task?.type === 'offer_letter') {
+    const personalInfoTask = taskStatuses.value.find(t => t.task?.type === 'personal_info')
+    if (personalInfoTask) {
+      return personalInfoTask.status === 'submitted' || personalInfoTask.status === 'approved'
+    }
+    return false
+  }
+  
   for (let i = 0; i < index; i++) {
     const prevTask = taskStatuses.value[i]
-    // Allow access if previous task is submitted or approved
     if (prevTask.status !== 'submitted' && prevTask.status !== 'approved') return false
   }
   return true
@@ -564,6 +1477,7 @@ const formatStatus = (status) => {
 const formatTaskType = (type) => {
   const types = {
     personal_info: 'Personal Information',
+    offer_letter: 'Offer Letter',
     government_forms: 'Government Forms',
     document_upload: 'Document Upload',
     policy_acknowledgment: 'Policy Acknowledgement',
@@ -580,14 +1494,26 @@ const getDocTitle = (type) => {
 }
 
 const selectTask = async (index) => {
-  if (!canAccessTask(index)) return
+  if (!canAccessTask(index)) {
+    console.log('[Navigation] Cannot access task at index', index)
+    return
+  }
+  
+  logAuditEvent('STEP_ENTERED', { 
+    stepIndex: index, 
+    taskId: taskStatuses.value[index]?.taskId,
+    taskType: taskStatuses.value[index]?.task?.type 
+  })
+  
   currentTaskIndex.value = index
+  saveCurrentStep(index)
+  
+  stopVideoSimulation()
   
   const task = taskStatuses.value[index]
   const candidate = onboarding.value?.candidate
   const savedFormData = getSavedFormData(task.taskId, task.task?.type)
   
-  // Pre-fill form data from saved data or candidate data
   if (task.task?.type === 'personal_info') {
     formData.value = savedFormData || {
       firstName: candidate?.firstName || '',
@@ -601,14 +1527,33 @@ const selectTask = async (index) => {
       emergencyPhone: candidate?.emergencyPhone || '',
       ssn: ''
     }
+  } else if (task.task?.type === 'offer_letter') {
+    formData.value = savedFormData || {
+      offerLetterTypedSignature: '',
+      offerLetterAttestationConfirmed: false,
+      offerLetterRead: false,
+      offerLetterAccepted: false
+    }
+    await fetchOfferLetterData()
   } else if (task.task?.type === 'government_forms') {
+    // Reset state for new task selection
+    govFormsStatus.value = 'empty'
+    govFormsDraftSaved.value = null
+    govFormsLastSaved.value = null
+    
+    // Start with empty form, then load from server
     formData.value = savedFormData || {}
+    
+    // Fetch existing draft or submitted snapshot from server
+    await fetchGovFormsStatus()
   } else if (task.task?.type === 'document_upload') {
     formData.value = savedFormData || {}
   } else if (task.task?.type === 'policy_acknowledgment') {
     formData.value = savedFormData || { policyAccepted: false, policyAgreed: false, policySignature: '' }
   } else if (task.task?.type === 'training_acknowledgment') {
-    formData.value = savedFormData || {}
+    formData.value = savedFormData || { trainingSignature: '', trainingAccepted: false, trainingAgreed: false }
+    currentVideoIndex.value = 0
+    await fetchTrainingVideos(task.taskId)
   } else if (task.task?.type === 'e_signature') {
     formData.value = savedFormData || {}
   } else if (task.task?.type === 'role_confirmation') {
@@ -619,11 +1564,6 @@ const selectTask = async (index) => {
     }
   } else {
     formData.value = savedFormData || {}
-  }
-  
-  if (currentTask.value?.task?.type === 'e_signature') {
-    await nextTick()
-    initCanvas()
   }
 }
 
@@ -636,91 +1576,245 @@ const checkScroll = () => {
   }
 }
 
-const initCanvas = () => {
-  if (signatureCanvas.value) {
-    const canvas = signatureCanvas.value
-    canvas.width = canvas.offsetWidth
-    canvas.height = 200
-    ctx = canvas.getContext('2d')
-    ctx.strokeStyle = '#000'
-    ctx.lineWidth = 2
+const isNameMatch = (typedName) => {
+  if (!typedName || !formData.value.firstName) return false
+  const typed = typedName.trim().toLowerCase()
+  const legalFull = `${formData.value.firstName} ${formData.value.lastName}`.toLowerCase().trim()
+  const legalNoSpace = `${formData.value.firstName}${formData.value.lastName}`.toLowerCase().trim()
+  return typed === legalFull || typed === legalNoSpace
+}
+
+const formatSavedTime = (isoString) => {
+  if (!isoString) return ''
+  try {
+    const date = new Date(isoString)
+    const now = new Date()
+    const diffMs = now - date
+    const diffMins = Math.floor(diffMs / 60000)
+    
+    if (diffMins < 1) return 'just now'
+    if (diffMins < 60) return `${diffMins} min ago`
+    
+    const diffHours = Math.floor(diffMins / 60)
+    if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`
+    
+    return date.toLocaleDateString()
+  } catch {
+    return isoString
   }
 }
 
-const startDrawing = (e) => {
-  isDrawing = true
-  ctx.beginPath()
-  ctx.moveTo(e.offsetX, e.offsetY)
-}
-
-const draw = (e) => {
-  if (!isDrawing) return
-  ctx.lineTo(e.offsetX, e.offsetY)
-  ctx.stroke()
-  isCanvasBlank.value = false
-}
-
-const stopDrawing = () => {
-  isDrawing = false
-}
-
-const startDrawingTouch = (e) => {
-  const touch = e.touches[0]
-  const rect = signatureCanvas.value.getBoundingClientRect()
-  isDrawing = true
-  ctx.beginPath()
-  ctx.moveTo(touch.clientX - rect.left, touch.clientY - rect.top)
-}
-
-const drawTouch = (e) => {
-  if (!isDrawing) return
-  const touch = e.touches[0]
-  const rect = signatureCanvas.value.getBoundingClientRect()
-  ctx.lineTo(touch.clientX - rect.left, touch.clientY - rect.top)
-  ctx.stroke()
-  isCanvasBlank.value = false
-}
-
-const stopDrawingTouch = () => {
-  isDrawing = false
-}
-
-const clearSignature = () => {
-  if (ctx) {
-    ctx.clearRect(0, 0, signatureCanvas.value.width, signatureCanvas.value.height)
-    isCanvasBlank.value = true
+const getClientIP = async () => {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json')
+    const data = await response.json()
+    return data.ip
+  } catch {
+    return 'unknown'
   }
 }
 
-const handleFileUpload = (e) => {
+const handleI9FileUpload = (e) => {
   const file = e.target.files[0]
   if (file) {
-    formData.value.uploadedFile = file.name
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed')
+      e.target.value = ''
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      e.target.value = ''
+      return
+    }
+    formData.value.i9UploadedFile = file.name
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      formData.value.i9UploadedFileData = event.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const handleFileUpload = (e, docType = 'other') => {
+  const file = e.target.files[0]
+  if (file) {
+    if (file.type !== 'application/pdf') {
+      alert('Only PDF files are allowed')
+      e.target.value = ''
+      return
+    }
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB')
+      e.target.value = ''
+      return
+    }
+    
+    const fileFieldMap = {
+      government_id: 'governmentIdFile',
+      drivers_license: 'driversLicenseFile',
+      certification: 'certificationFile',
+      education: 'educationFile',
+      other: 'otherFile'
+    }
+    
+    const dataFieldMap = {
+      government_id: 'governmentIdFileData',
+      drivers_license: 'driversLicenseFileData',
+      certification: 'certificationFileData',
+      education: 'educationFileData',
+      other: 'otherFileData'
+    }
+    
+    const fileField = fileFieldMap[docType] || 'otherFile'
+    const dataField = dataFieldMap[docType] || 'otherFileData'
+    
+    formData.value[fileField] = file.name
+    const reader = new FileReader()
+    reader.onload = (event) => {
+      formData.value[dataField] = event.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
+const goToNextStep = async () => {
+  const nextIndex = currentTaskIndex.value + 1
+  if (nextIndex < taskStatuses.value.length && canAccessTask(nextIndex)) {
+    await selectTask(nextIndex)
+    logAuditEvent('STEP_NAVIGATED', { direction: 'next', toIndex: nextIndex })
   }
 }
 
 const submitTask = async () => {
+  if (currentTask.value?.task?.type === 'offer_letter') {
+    if (!formData.value.offerLetterTypedSignature || formData.value.offerLetterTypedSignature.trim().length < 2) {
+      alert('Please type your full legal name to sign the offer letter')
+      return
+    }
+    if (!formData.value.offerLetterAttestationConfirmed) {
+      alert('Please confirm the attestation to sign the offer letter')
+      return
+    }
+    if (!formData.value.offerLetterRead) {
+      alert('Please confirm that you have read the offer letter')
+      return
+    }
+    if (!formData.value.offerLetterAccepted) {
+      alert('Please accept the terms and conditions of the offer letter')
+      return
+    }
+  }
+
+  if (currentTask.value?.task?.type === 'e_signature') {
+    if (!formData.value.typedSignature || !formData.value.typedSignature.trim()) {
+      alert('Please type your full legal name to sign')
+      return
+    }
+    if (!formData.value.attestationConfirmed) {
+      alert('Please confirm the attestation to sign')
+      return
+    }
+    if (formData.value.typedSignature && !isNameMatch(formData.value.typedSignature)) {
+      alert('Signature name must match your legal name. Please type your exact legal name.')
+      return
+    }
+  }
+  
+  if (currentTask.value?.task?.type === 'government_forms') {
+    if (!formData.value.w4TypedSignature || formData.value.w4TypedSignature.trim().length < 2) {
+      alert('Please type your name to sign Form W-4')
+      return
+    }
+    if (!formData.value.w4AttestationConfirmed) {
+      alert('Please confirm the attestation for Form W-4')
+      return
+    }
+    if (!formData.value.i9TypedSignature || formData.value.i9TypedSignature.trim().length < 2) {
+      alert('Please type your name to sign Form I-9')
+      return
+    }
+    if (!formData.value.i9AttestationConfirmed) {
+      alert('Please confirm the attestation for Form I-9')
+      return
+    }
+    if (!formData.value.i9UploadedFileData) {
+      alert('Please upload your ID document before submitting')
+      return
+    }
+  }
+  
   submitting.value = true
   try {
+    if (currentTask.value?.task?.type === 'offer_letter' && formData.value.offerLetterTypedSignature) {
+      formData.value.offerLetterSignedAt = new Date().toISOString()
+      formData.value.offerLetterSignatureMethod = 'typed_name'
+      formData.value.offerLetterSignatureIp = await getClientIP()
+      formData.value.offerLetterSignatureUserAgent = navigator.userAgent
+    }
+
+    if (currentTask.value?.task?.type === 'e_signature' && formData.value.typedSignature) {
+      formData.value.signedAt = new Date().toISOString()
+      formData.value.signatureMethod = 'typed_name'
+      formData.value.signatureIp = await getClientIP()
+      formData.value.signatureUserAgent = navigator.userAgent
+    }
+    
+    if (currentTask.value?.task?.type === 'government_forms') {
+      if (formData.value.w4TypedSignature) {
+        formData.value.w4SignedAt = new Date().toISOString()
+        formData.value.w4SignatureMethod = 'typed_name'
+        formData.value.w4SignatureIp = await getClientIP()
+      }
+      if (formData.value.i9TypedSignature) {
+        formData.value.i9SignedAt = new Date().toISOString()
+        formData.value.i9SignatureMethod = 'typed_name'
+        formData.value.i9SignatureIp = await getClientIP()
+      }
+    }
+    
     const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
     const currentTaskId = currentTask.value.taskId
     
     if (isDemo) {
-      // Save form data to localStorage
-      const savedData = loadSavedData() || {}
-      savedData[currentTaskId] = { ...formData.value }
-      saveData(savedData)
+      // Government forms submission uses server-side API for snapshot integrity
+      if (currentTask.value?.task?.type === 'government_forms') {
+        // Submit via server API to create immutable snapshot
+        const submitResponse = await api.post('/onboarding/government-forms/submit', {
+          ...formData.value
+        })
+        
+        if (submitResponse.error) {
+          alert(submitResponse.error.message)
+          return
+        }
+        
+        govFormsStatus.value = 'submitted'
+        logAuditEvent('GOV_FORMS_SUBMITTED', {
+          snapshotId: submitResponse.data?.snapshotId,
+          submittedAt: submitResponse.data?.submittedAt
+        })
+      } else {
+        const savedData = loadSavedData() || {}
+        savedData[currentTaskId] = { ...formData.value }
+        saveData(savedData)
+      }
       
-      // Update the task status in the array
       const taskIndex = taskStatuses.value.findIndex(t => t.taskId === currentTaskId)
       if (taskIndex !== -1) {
         taskStatuses.value[taskIndex].status = 'submitted'
         taskStatuses.value[taskIndex].submissionData = formData.value
         taskStatuses.value[taskIndex].submittedAt = new Date()
       }
+      
+      logAuditEvent('STEP_COMPLETED', { 
+        taskId: currentTaskId,
+        taskType: currentTask.value?.task?.type
+      })
+      
       await new Promise(r => setTimeout(r, 500))
       
-      // Auto-advance to next task
+      // USER EXPLICITLY SUBMITS - advance to next task
       if (currentTaskIndex.value < taskStatuses.value.length - 1) {
         await selectTask(currentTaskIndex.value + 1)
       } else {
@@ -731,7 +1825,12 @@ const submitTask = async () => {
       await api.post(`/onboarding/${onboarding.value.id}/tasks/${currentTask.value.taskId}/submit`, {
         submissionData: formData.value
       })
-      // Auto-advance to next task
+      
+      logAuditEvent('STEP_COMPLETED', { 
+        taskId: currentTaskId,
+        taskType: currentTask.value?.task?.type
+      })
+      
       if (currentTaskIndex.value < taskStatuses.value.length - 1) {
         await selectTask(currentTaskIndex.value + 1)
       } else {
@@ -750,7 +1849,6 @@ const submitTask = async () => {
 const closeConfirmation = () => {
   showConfirmation.value = false
   submittedTask.value = null
-  // Move to next task
   if (currentTaskIndex.value < taskStatuses.value.length - 1) {
     selectTask(currentTaskIndex.value + 1)
   }
@@ -761,8 +1859,8 @@ onMounted(async () => {
     const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
     let data
     if (isDemo) {
-      // Load saved data from localStorage
       const savedData = loadSavedData()
+      const savedStep = loadCurrentStep()
       
       data = { 
         id: 'onboarding-1', 
@@ -782,16 +1880,16 @@ onMounted(async () => {
         },
         taskStatuses: [
           { taskId: 't1', task: { name: 'Personal Information', type: 'personal_info', description: 'Complete your personal profile', isRequired: true, order: 1 }, status: savedData?.['t1'] ? 'submitted' : 'draft' },
-          { taskId: 't2', task: { name: 'Government Forms', type: 'government_forms', description: 'W-4 and I-9 tax forms', isRequired: true, order: 2 }, status: savedData?.['t2'] ? 'submitted' : 'draft' },
-          { taskId: 't3', task: { name: 'Document Upload', type: 'document_upload', description: 'Upload ID and certifications', isRequired: true, order: 3 }, status: savedData?.['t3'] ? 'submitted' : 'draft' },
-          { taskId: 't4', task: { name: 'Policy Acknowledgement', type: 'policy_acknowledgment', description: 'Review and acknowledge company policies', isRequired: true, order: 4 }, status: savedData?.['t4'] ? 'submitted' : 'draft' },
-          { taskId: 't5', task: { name: 'Training Acknowledgement', type: 'training_acknowledgment', description: 'Complete required training', isRequired: true, order: 5 }, status: savedData?.['t5'] ? 'submitted' : 'draft' },
-          { taskId: 't6', task: { name: 'E-Signature', type: 'e_signature', description: 'Sign offer letter and NDA', isRequired: true, order: 6 }, status: savedData?.['t6'] ? 'submitted' : 'draft' },
-          { taskId: 't7', task: { name: 'Role Confirmation', type: 'role_confirmation', description: 'Review and confirm your role', isRequired: true, order: 7 }, status: savedData?.['t7'] ? 'submitted' : 'draft' },
+          { taskId: 't2', task: { name: 'Offer Letter', type: 'offer_letter', description: 'Review and sign your offer letter', isRequired: true, order: 2 }, status: savedData?.['t2'] ? 'submitted' : 'draft' },
+          { taskId: 't3', task: { name: 'Government Forms', type: 'government_forms', description: 'W-4 and I-9 tax forms', isRequired: true, order: 3 }, status: savedData?.['t3'] ? 'submitted' : 'draft' },
+          { taskId: 't4', task: { name: 'Document Upload', type: 'document_upload', description: 'Upload optional documents (ID, certifications)', isRequired: false, order: 4 }, status: savedData?.['t4'] ? 'submitted' : 'draft' },
+          { taskId: 't5', task: { name: 'Policy Acknowledgement', type: 'policy_acknowledgment', description: 'Review and acknowledge company policies', isRequired: true, order: 5 }, status: savedData?.['t5'] ? 'submitted' : 'draft' },
+          { taskId: 't6', task: { name: 'Training Acknowledgement', type: 'training_acknowledgment', description: 'Complete required training', isRequired: true, order: 6 }, status: savedData?.['t6'] ? 'submitted' : 'draft' },
+          { taskId: 't7', task: { name: 'E-Signature', type: 'e_signature', description: 'Sign NDA and other documents', isRequired: true, order: 7 }, status: savedData?.['t7'] ? 'submitted' : 'draft' },
+          { taskId: 't8', task: { name: 'Role Confirmation', type: 'role_confirmation', description: 'Review and confirm your role', isRequired: true, order: 8 }, status: savedData?.['t8'] ? 'submitted' : 'draft' },
         ]
       }
       
-      // Update submission data from saved
       if (savedData) {
         for (const taskId in savedData) {
           const taskStatus = data.taskStatuses.find(t => t.taskId === taskId)
@@ -807,15 +1905,66 @@ onMounted(async () => {
     onboarding.value = data
     taskStatuses.value = data.taskStatuses || []
     
-    // Find first incomplete task to start from
+    // RESUME at last incomplete step (not step 3 by default)
     const firstIncompleteIndex = taskStatuses.value.findIndex(t => t.status !== 'submitted' && t.status !== 'approved')
-    if (firstIncompleteIndex > 0) {
+    
+    if (firstIncompleteIndex !== null && firstIncompleteIndex >= 0) {
       await selectTask(firstIncompleteIndex)
-    } else if (firstIncompleteIndex === 0 || taskStatuses.value.length > 0) {
+    } else if (taskStatuses.value.length > 0) {
       await selectTask(0)
     }
+    
+    logAuditEvent('ONBOARDING_STARTED', { 
+      candidateId: onboarding.value?.candidate?.id,
+      taskCount: taskStatuses.value.length
+    })
   } catch (err) {
     console.error('Failed to load onboarding:', err)
+  }
+})
+
+// Navigation safety - auto-save government forms when leaving
+const handleBeforeUnload = async (e) => {
+  if (currentTask.value?.task?.type === 'government_forms' && govFormsStatus.value !== 'submitted') {
+    // Attempt to save draft before leaving
+    await saveGovFormsDraft(false)
+    
+    // If save failed, show warning
+    if (govFormsSaving.value) {
+      e.preventDefault()
+      e.returnValue = 'Your form is being saved. Are you sure you want to leave?'
+      return e.returnValue
+    }
+  }
+  
+  // Also save any pending video progress
+  if (videoSimInterval.value) {
+    stopVideoSimulation()
+  }
+}
+
+// Watch for current task changes to add/remove beforeunload listener
+watch(() => currentTask.value?.task?.type, (newType, oldType) => {
+  if (newType === 'government_forms') {
+    window.addEventListener('beforeunload', handleBeforeUnload)
+  } else if (oldType === 'government_forms') {
+    window.removeEventListener('beforeunload', handleBeforeUnload)
+    // Save draft when leaving government forms task
+    if (govFormsStatus.value !== 'submitted') {
+      saveGovFormsDraft(false)
+    }
+  }
+})
+
+onUnmounted(async () => {
+  stopVideoSimulation()
+  
+  // Clean up beforeunload listener
+  window.removeEventListener('beforeunload', handleBeforeUnload)
+  
+  // Final save for government forms
+  if (currentTask.value?.task?.type === 'government_forms' && govFormsStatus.value !== 'submitted') {
+    await saveGovFormsDraft(false)
   }
 })
 </script>
@@ -1221,10 +2370,21 @@ onMounted(async () => {
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
+  position: relative;
 }
 
 .file-upload:hover {
   border-color: #42b883;
+}
+
+.file-upload input[type="file"] {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
 }
 
 .upload-icon {
@@ -1336,27 +2496,138 @@ onMounted(async () => {
   line-height: 1.8;
 }
 
+.doc-version {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  background: #334155;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+}
+
+.offer-letter-content {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.offer-letter-content p {
+  white-space: pre-wrap;
+  color: #1e293b;
+  background: #fff;
+  padding: 1rem;
+  border-radius: 6px;
+}
+
 .signature-pad {
-  background: white;
+  position: relative;
+  background: linear-gradient(to bottom, #fff 0%, #fafafa 100%);
+  border: 2px solid #ccc;
   border-radius: 8px;
   cursor: crosshair;
   width: 100%;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
 }
 
-.btn-clear {
-  background: #334155;
-  color: #94a3b8;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+/* Typed Signature Styles (replaces canvas) */
+.signature-section {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+  border: 1px solid #e2e8f0;
+}
+
+.signature-instruction {
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.typed-signature-wrapper {
+  margin-bottom: 1rem;
+}
+
+.typed-signature-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  font-size: 1.125rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.typed-signature-input:focus {
+  outline: none;
+  border-color: #3182ce;
+  box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.1);
+}
+
+.typed-signature-input.signature-match {
+  border-color: #38a169;
+  background-color: #f0fff4;
+}
+
+.typed-signature-input.signature-mismatch {
+  border-color: #e53e3e;
+  background-color: #fff5f5;
+}
+
+.signature-warning {
+  color: #e53e3e;
+  font-size: 0.75rem;
   margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #fff5f5;
+  border-radius: 4px;
+}
+
+.signature-verified {
+  color: #38a169;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  background: #f0fff4;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.attestation-checkbox {
+  margin: 1rem 0;
+}
+
+.attestation-checkbox .checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
   cursor: pointer;
+}
+
+.attestation-checkbox input[type="checkbox"] {
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-top: 0.125rem;
+  cursor: pointer;
+  accent-color: #3182ce;
+}
+
+.attestation-checkbox span {
+  color: #475569;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.signature-date {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .legal-text {
   color: #64748b;
   font-size: 0.75rem;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
+  line-height: 1.5;
 }
 
 .role-details {
@@ -1483,5 +2754,557 @@ onMounted(async () => {
 .modal-enter-from, .modal-leave-to {
   opacity: 0;
   transform: scale(0.9);
+}
+
+/* Training Video Styles */
+.training-progress-summary {
+  background: #fff;
+  border-radius: 8px;
+  padding: 1.25rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #e2e8f0;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  color: #64748b;
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.training-progress-summary .progress-bar {
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.training-progress-summary .progress-fill {
+  height: 100%;
+  background: #48bb78;
+  border-radius: 4px;
+  transition: width 0.3s;
+}
+
+.progress-ready {
+  background: #f0fff4;
+  color: #276749;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.progress-waiting {
+  background: #fffaf0;
+  color: #975a16;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+}
+
+.video-list {
+  margin-bottom: 1.5rem;
+}
+
+.video-item {
+  display: flex;
+  align-items: flex-start;
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+}
+
+.video-item:hover {
+  background: #1e293b;
+}
+
+.video-item.video-active {
+  border-color: #3182ce;
+  background: #1e293b;
+}
+
+.video-thumbnail {
+  width: 60px;
+  height: 45px;
+  background: #334155;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 1rem;
+  flex-shrink: 0;
+}
+
+.thumbnail-play {
+  color: #fff;
+  font-size: 14px;
+}
+
+.thumbnail-check {
+  color: #48bb78;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.video-info {
+  flex: 1;
+}
+
+.video-title {
+  color: #f8fafc;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  cursor: pointer;
+}
+
+.video-title:hover {
+  color: #3182ce;
+}
+
+.required-badge {
+  color: #e53e3e;
+  font-weight: bold;
+}
+
+.video-duration {
+  color: #94a3b8;
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.video-progress-bar {
+  height: 4px;
+  background: #334155;
+  border-radius: 2px;
+  overflow: hidden;
+  margin-bottom: 0.25rem;
+}
+
+.video-progress-fill {
+  height: 100%;
+  background: #3182ce;
+  transition: width 0.3s;
+}
+
+.video-progress-fill.progress-complete {
+  background: #48bb78;
+}
+
+.video-status {
+  color: #64748b;
+  font-size: 0.75rem;
+}
+
+.current-video {
+  background: #0f172a;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.now-playing {
+  color: #3182ce;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
+}
+
+.current-video .video-name {
+  color: #f8fafc;
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+.video-description {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+  line-height: 1.6;
+}
+
+.video-player {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  background: #1a202c;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 1rem;
+}
+
+.html5-video-player {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000;
+}
+
+.video-progress-bar-external {
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 0 0 8px 8px;
+  margin-top: -0.5rem;
+}
+
+.player-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-placeholder {
+  text-align: center;
+}
+
+.play-button {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+  color: #fff;
+  font-size: 24px;
+}
+
+.player-text {
+  color: #fff;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.player-subtext {
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.video-progress-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+.progress-track {
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.progress-indicator {
+  height: 100%;
+  background: #3182ce;
+  border-radius: 2px;
+  transition: width 0.3s;
+}
+
+.progress-indicator.indicator-complete {
+  background: #48bb78;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: #fff;
+  font-size: 0.75rem;
+}
+
+.video-required-notice {
+  background: #fffaf0;
+  color: #975a16;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.video-completed-badge {
+  background: #48bb78;
+  color: #fff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-block;
+  margin-bottom: 1rem;
+}
+
+.anticheat-notice {
+  background: #edf2f7;
+  color: #64748b;
+  padding: 0.75rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+.acknowledge-section {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 1.5rem;
+  border: 1px solid #334155;
+}
+
+.acknowledge-section.ready {
+  border-color: #48bb78;
+  background: linear-gradient(to bottom, rgba(72, 187, 120, 0.05), #0f172a);
+}
+
+.acknowledge-section .signature-field {
+  margin-bottom: 1.25rem;
+}
+
+.acknowledge-section .signature-field input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.acknowledge-section .checkbox-label input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.acknowledge-section .checkbox-label span {
+  color: #94a3b8;
+}
+
+.training-list {
+  margin-bottom: 1.5rem;
+}
+
+/* Optional Document Upload Styles */
+.optional-docs-list {
+  margin-top: 1.5rem;
+}
+
+.optional-doc-item {
+  background: #0f172a;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border: 1px solid #334155;
+}
+
+.doc-type-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+}
+
+.doc-type-label {
+  color: #f8fafc;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+.optional-badge {
+  background: #48bb78;
+  color: #fff;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.optional-upload {
+  border-color: #334155;
+  background: #1e293b;
+}
+
+.optional-upload:hover {
+  border-color: #48bb78;
+}
+
+.optional-upload .upload-icon {
+  color: #94a3b8;
+}
+
+.optional-upload p {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.uploads-summary {
+  background: #1e293b;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-top: 1.5rem;
+  border: 1px solid #48bb78;
+}
+
+.uploads-summary h4 {
+  color: #48bb78;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.uploads-summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.uploads-summary li {
+  color: #94a3b8;
+  font-size: 0.8rem;
+  padding: 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.uploads-summary li::before {
+  content: '✓';
+  color: #48bb78;
+  font-weight: bold;
+}
+
+/* Government Forms Status Styles */
+.gov-forms-status-bar {
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.status-submitted {
+  background: rgba(72, 187, 120, 0.15);
+  border: 1px solid #48bb78;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.status-submitted .status-icon {
+  color: #48bb78;
+  font-size: 1.25rem;
+}
+
+.status-submitted .status-text {
+  color: #48bb78;
+  font-weight: 600;
+}
+
+.status-submitted .status-detail {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+.status-draft {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid #3b82f6;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+}
+
+.status-saved, .status-saving {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #3b82f6;
+}
+
+.status-saved .status-icon {
+  font-size: 1rem;
+}
+
+.status-saved .status-text {
+  font-weight: 500;
+}
+
+.status-saved .status-detail {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-left: auto;
+}
+
+.status-saving {
+  font-weight: 500;
+}
+
+.saving-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #3b82f6;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.status-empty {
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid #64748b;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.submitted-notice {
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.submitted-notice strong {
+  color: #3b82f6;
+}
+
+.readonly-mode {
+  opacity: 0.7;
+}
+
+.readonly-mode input,
+.readonly-mode select,
+.readonly-mode textarea {
+  background: #1e293b !important;
+  cursor: not-allowed;
+}
+
+.upload-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.upload-disabled input {
+  display: none;
+}
+
+.signature-verified {
+  border-color: #48bb78 !important;
+  background-color: rgba(72, 187, 120, 0.05) !important;
 }
 </style>
