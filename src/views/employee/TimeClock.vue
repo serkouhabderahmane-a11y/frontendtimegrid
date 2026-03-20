@@ -5,10 +5,22 @@
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
       </svg>
-      <span>Demo Mode - Clock actions are disabled</span>
+      <span>Demo Mode - Clock actions are simulated</span>
     </div>
 
-    <div class="clock-container">
+    <!-- No Clock Access Message -->
+    <div v-if="!canClock" class="no-access-notice">
+      <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+      </svg>
+      <div class="no-access-content">
+        <h3>Clock In/Out Not Available</h3>
+        <p>Your role does not have access to clock in/out functionality.</p>
+        <p class="role-info">Role: {{ authStore.role }}</p>
+      </div>
+    </div>
+
+    <div v-if="canClock" class="clock-container">
       <div class="clock-card">
         <div class="clock-header">
           <h1>Time Clock</h1>
@@ -39,9 +51,15 @@
         </div>
         
         <div class="clock-actions">
-          <Transition name="pulse" mode="out-in">
+          <div v-if="todayEntry?.clockOut" class="completed-message">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <span>You're all done for today!</span>
+          </div>
+          <div v-else class="clock-buttons">
             <button
-              v-if="!todayEntry?.clockOut"
+              v-if="!todayEntry"
               @click="handleClockIn"
               class="clock-btn clock-in"
               :disabled="loading"
@@ -62,35 +80,28 @@
               </svg>
               {{ loading ? 'Clocking Out...' : 'Clock Out' }}
             </button>
-          </Transition>
-        </div>
-
-        <div v-if="todayEntry?.clockOut" class="completed-message">
-          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-          </svg>
-          <span>You're all done for today!</span>
+          </div>
         </div>
       </div>
-      
-      <!-- Recent Entries -->
-      <div class="entries-card">
-        <h2>Recent Entries</h2>
-        <div class="entries-list">
-          <div v-for="entry in entries" :key="entry.id" class="entry-row">
-            <div class="entry-date">
-              <span class="date-day">{{ formatDate(entry.clockIn) }}</span>
-            </div>
-            <div class="entry-time">
-              <span>{{ formatTime(entry.clockIn) }} - {{ entry.clockOut ? formatTime(entry.clockOut) : 'Active' }}</span>
-            </div>
-            <div class="entry-duration">
-              {{ entry.totalMinutes ? formatMinutes(entry.totalMinutes) : calculateDuration(entry.clockIn) }}
-            </div>
+    </div>
+    
+    <!-- Recent Entries - available to all roles -->
+    <div class="entries-card">
+      <h2>Recent Entries</h2>
+      <div class="entries-list">
+        <div v-for="entry in entries" :key="entry.id" class="entry-row">
+          <div class="entry-date">
+            <span class="date-day">{{ formatDate(entry.clockIn) }}</span>
           </div>
-          <div v-if="entries.length === 0" class="no-entries">
-            No recent entries
+          <div class="entry-time">
+            <span>{{ formatTime(entry.clockIn) }} - {{ entry.clockOut ? formatTime(entry.clockOut) : 'Active' }}</span>
           </div>
+          <div class="entry-duration">
+            {{ entry.totalMinutes ? formatMinutes(entry.totalMinutes) : calculateDuration(entry.clockIn) }}
+          </div>
+        </div>
+        <div v-if="entries.length === 0" class="no-entries">
+          No recent entries
         </div>
       </div>
     </div>
@@ -120,6 +131,7 @@ const loading = ref(false)
 const error = ref('')
 
 const isDemo = computed(() => authStore.isDemo || authStore.accessToken?.startsWith('demo-'))
+const canClock = computed(() => authStore.canClock)
 
 let timeInterval
 
@@ -267,8 +279,6 @@ onUnmounted(() => {
 }
 
 .clock-container {
-  max-width: 500px;
-  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
@@ -278,6 +288,36 @@ onUnmounted(() => {
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+.no-access-notice {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 1rem;
+  padding: 2rem;
+  margin-top: 2rem;
+  color: #60a5fa;
+}
+
+.no-access-content h3 {
+  color: #f8fafc;
+  font-size: 1.125rem;
+  margin-bottom: 0.5rem;
+}
+
+.no-access-content p {
+  color: #94a3b8;
+  font-size: 0.875rem;
+  margin-bottom: 0.25rem;
+}
+
+.no-access-content .role-info {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
 }
 
 .clock-card {
@@ -382,6 +422,11 @@ onUnmounted(() => {
 .clock-actions {
   display: flex;
   justify-content: center;
+}
+
+.clock-buttons {
+  display: flex;
+  gap: 1rem;
 }
 
 .clock-btn {

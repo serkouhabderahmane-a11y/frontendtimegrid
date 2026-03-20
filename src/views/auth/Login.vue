@@ -161,31 +161,37 @@ const demoRoles = ref([
     role: 'hr_admin',
     title: 'HR Admin',
     icon: '👔',
-    description: 'Manage onboarding & training'
+    description: 'Manage onboarding, training & users'
   },
   {
     role: 'supervisor',
     title: 'Supervisor',
     icon: '👁️',
-    description: 'Review team timesheets'
+    description: 'Approve timesheets & lock notes'
   },
   {
     role: 'staff',
     title: 'Staff',
     icon: '👤',
-    description: 'Clock in/out & notes'
+    description: 'Clock in/out & view schedule'
   },
   {
     role: 'nurse',
     title: 'Nurse',
     icon: '🏥',
-    description: 'Care & medication'
+    description: 'Care notes & medication MAR'
+  },
+  {
+    role: 'med_tech',
+    title: 'Med Tech',
+    icon: '💊',
+    description: 'Medication administration'
   },
   {
     role: 'auditor',
     title: 'Auditor',
     icon: '📋',
-    description: 'Read-only reports'
+    description: 'Read-only compliance reports'
   }
 ])
 

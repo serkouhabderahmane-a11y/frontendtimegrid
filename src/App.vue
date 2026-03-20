@@ -8,8 +8,13 @@ const router = useRouter()
 
 const isAuthenticated = computed(() => authStore.isAuthenticated)
 const isHR = computed(() => authStore.isHR || authStore.isAdmin)
+const isSupervisor = computed(() => authStore.isSupervisor)
+const isStaff = computed(() => authStore.isStaff)
+const isClinical = computed(() => authStore.isClinical)
+const isAuditor = computed(() => authStore.isAuditor)
 const isEmployee = computed(() => authStore.isEmployee)
 const isDemo = computed(() => authStore.isDemo)
+const isReadOnly = computed(() => authStore.isReadOnly)
 
 const handleLogout = () => {
   authStore.logout()
@@ -30,7 +35,6 @@ const resetDemoData = async () => {
 }
 
 onMounted(async () => {
-  // Initialize from storage on app start
   authStore.initFromStorage()
   
   const isDemo = authStore.accessToken?.startsWith('demo-')
@@ -76,6 +80,8 @@ onMounted(async () => {
         
         <div class="nav-links">
           <RouterLink to="/" class="nav-link">Home</RouterLink>
+          
+          <!-- HR Admin Navigation -->
           <template v-if="isHR">
             <RouterLink to="/admin" class="nav-link">Dashboard</RouterLink>
             <RouterLink to="/admin/candidates" class="nav-link">Candidates</RouterLink>
@@ -83,17 +89,52 @@ onMounted(async () => {
               Approvals
               <span class="badge">3</span>
             </RouterLink>
-            <RouterLink to="/admin/payroll" class="nav-link">Payroll</RouterLink>
             <RouterLink to="/admin/daily-notes" class="nav-link">Daily Notes</RouterLink>
             <RouterLink to="/admin/mar" class="nav-link">MAR</RouterLink>
             <RouterLink to="/admin/training-videos" class="nav-link">Training</RouterLink>
           </template>
-          <RouterLink v-if="isEmployee" to="/employee/timeclock" class="nav-link">Time Clock</RouterLink>
+          
+          <!-- Supervisor Navigation -->
+          <template v-if="isSupervisor">
+            <RouterLink to="/admin/approvals" class="nav-link">
+              Approval Queue
+              <span class="badge">3</span>
+            </RouterLink>
+            <RouterLink to="/admin/timesheets" class="nav-link">Timesheets</RouterLink>
+            <RouterLink to="/admin/daily-notes" class="nav-link">Notes</RouterLink>
+            <RouterLink to="/admin/mar" class="nav-link">MAR</RouterLink>
+          </template>
+          
+          <!-- Staff Navigation -->
+          <template v-if="isStaff">
+            <RouterLink to="/employee/timeclock" class="nav-link">Time Clock</RouterLink>
+            <RouterLink to="/employee/schedule" class="nav-link">Schedule</RouterLink>
+            <RouterLink to="/announcements" class="nav-link">Announcements</RouterLink>
+          </template>
+          
+          <!-- Clinical Navigation (Nurse/Med Tech) -->
+          <template v-if="isClinical">
+            <RouterLink to="/employee/timeclock" class="nav-link">Time Clock</RouterLink>
+            <RouterLink to="/care/participants" class="nav-link">Participants</RouterLink>
+            <RouterLink to="/care/mar" class="nav-link">MAR</RouterLink>
+            <RouterLink to="/care/vitals" class="nav-link">Vitals</RouterLink>
+            <RouterLink to="/care/notes" class="nav-link">Care Notes</RouterLink>
+          </template>
+          
+          <!-- Auditor Navigation -->
+          <template v-if="isAuditor">
+            <RouterLink to="/audit/dashboard" class="nav-link">Audit</RouterLink>
+            <RouterLink to="/reports" class="nav-link">Reports</RouterLink>
+            <RouterLink to="/audit/logs" class="nav-link">Audit Logs</RouterLink>
+          </template>
+          
+          <!-- Common Navigation -->
           <RouterLink to="/chat" class="nav-link">Messages</RouterLink>
-          <RouterLink to="/admin/social-feed" class="nav-link">Feed</RouterLink>
+          <RouterLink to="/announcements" class="nav-link">Announcements</RouterLink>
         </div>
         
         <div class="nav-user">
+          <span v-if="isReadOnly" class="readonly-badge">Read Only</span>
           <div class="user-avatar">{{ authStore.user?.firstName?.[0] }}{{ authStore.user?.lastName?.[0] }}</div>
           <span class="user-name">{{ authStore.fullName }}</span>
           <button @click="handleLogout" class="btn-logout">Logout</button>
@@ -281,6 +322,17 @@ onMounted(async () => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.readonly-badge {
+  background: rgba(59, 130, 246, 0.2);
+  color: #60a5fa;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .user-avatar {

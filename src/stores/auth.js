@@ -35,7 +35,23 @@ export const useAuthStore = defineStore('auth', {
     },
     isHR: (state) => {
       const role = state.user?.role;
-      return role === 'hr' || role === 'hr_admin' || role === 'auditor';
+      return role === 'hr' || role === 'hr_admin';
+    },
+    isSupervisor: (state) => {
+      const role = state.user?.role;
+      return role === 'supervisor';
+    },
+    isStaff: (state) => {
+      const role = state.user?.role;
+      return role === 'staff';
+    },
+    isClinical: (state) => {
+      const role = state.user?.role;
+      return role === 'nurse' || role === 'med_tech';
+    },
+    isAuditor: (state) => {
+      const role = state.user?.role;
+      return role === 'auditor';
     },
     isManager: (state) => {
       const role = state.user?.role;
@@ -55,6 +71,39 @@ export const useAuthStore = defineStore('auth', {
     hasPermission: (state) => (permission) => {
       if (state.user?.role === 'super_admin') return true;
       return state.user?.permissions?.includes(permission) || false;
+    },
+    // Role-specific capability checks
+    canClock: (state) => {
+      const role = state.user?.role;
+      return role === 'staff' || role === 'nurse' || role === 'med_tech';
+    },
+    canApprove: (state) => {
+      const role = state.user?.role;
+      return role === 'supervisor' || role === 'hr_admin' || role === 'admin';
+    },
+    canCreate: (state) => {
+      const role = state.user?.role;
+      return role !== 'auditor'; // Auditors are read-only
+    },
+    canEdit: (state) => {
+      const role = state.user?.role;
+      return role !== 'auditor'; // Auditors are read-only
+    },
+    canAdministerMedication: (state) => {
+      const role = state.user?.role;
+      return role === 'nurse' || role === 'med_tech';
+    },
+    canViewOtherEmployees: (state) => {
+      const role = state.user?.role;
+      return role === 'supervisor' || role === 'hr_admin' || role === 'admin';
+    },
+    canExport: (state) => {
+      const role = state.user?.role;
+      return role === 'supervisor' || role === 'hr_admin' || role === 'admin' || role === 'auditor';
+    },
+    isReadOnly: (state) => {
+      const role = state.user?.role;
+      return role === 'auditor';
     },
   },
 
@@ -158,35 +207,42 @@ export const useAuthStore = defineStore('auth', {
           'reports.view', 'reports.export'
         ],
         'supervisor': [
-          'users.view',
           'timesheet.view', 'timesheet.approve',
-          'notes.view', 'notes.create', 'notes.edit',
+          'notes.view', 'notes.lock',
           'medication.review',
-          'reports.view'
+          'participants.view', 'participants.assignments',
+          'reports.view', 'reports.export',
+          'announcements.view'
         ],
         'staff': [
-          'timesheet.view', 'timesheet.create',
-          'notes.view', 'notes.create',
-          'onboarding.view',
+          'clock.in', 'clock.out',
+          'breaks.record',
+          'timesheet.view', 'timesheet.create', 'timesheet.submit',
+          'schedule.view_own',
+          'announcements.view',
+          'notes.view', 'notes.create_draft',
           'training.view'
         ],
         'nurse': [
-          'timesheet.view', 'timesheet.create',
-          'notes.view', 'notes.create', 'notes.edit',
-          'care.view', 'care.manage',
-          'medication.review',
+          'participants.view_assigned',
+          'medication.schedule.view',
+          'medication.administer',
+          'vitals.enter', 'outcomes.enter',
+          'care_notes.submit', 'care_notes.attach',
+          'training.view'
+        ],
+        'med_tech': [
+          'participants.view_assigned',
+          'medication.schedule.view',
+          'medication.administer',
+          'vitals.enter', 'outcomes.enter',
+          'care_notes.submit', 'care_notes.attach',
           'training.view'
         ],
         'auditor': [
-          'users.view',
-          'tenant.view',
-          'locations.view',
-          'onboarding.view',
-          'timesheet.view',
-          'notes.view',
-          'care.view',
-          'training.view',
+          'records.view',
           'reports.view', 'reports.export',
+          'documents.download',
           'audit.view', 'audit.export'
         ],
       };
