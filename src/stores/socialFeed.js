@@ -122,7 +122,7 @@ export const useSocialFeedStore = defineStore('socialFeed', {
         const index = this.posts.findIndex((p) => p.id === postId);
         if (index !== -1) {
           this.posts[index].reactions = this.posts[index].reactions.filter(
-            (r) => !(r.userId === this.getCurrentUserId && r.type === type)
+            (r) => !(r.userId === this.getCurrentUserId() && r.type === type)
           );
         }
       } catch (error) {

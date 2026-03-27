@@ -65,13 +65,13 @@ const routes = [
     path: '/admin/daily-notes',
     name: 'DailyNotes',
     component: () => import('../views/admin/DailyNotes.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin', 'manager', 'supervisor', 'employee'] },
   },
   {
     path: '/admin/mar',
     name: 'MAR',
     component: () => import('../views/admin/MAR.vue'),
-    meta: { requiresAuth: true },
+    meta: { requiresAuth: true, roles: ['admin', 'manager', 'supervisor', 'employee'] },
   },
   {
     path: '/admin/social-feed',
@@ -212,6 +212,12 @@ const routes = [
     path: '/employee/attendance',
     name: 'EmployeeAttendance',
     component: () => import('../views/employee/attendance/TimeClock.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/employee/daily-notes',
+    name: 'EmployeeDailyNotes',
+    component: () => import('../views/employee/DailyNotes.vue'),
     meta: { requiresAuth: true },
   },
   // NEW MODULE ROUTES - EMPLOYEE TIME-OFF

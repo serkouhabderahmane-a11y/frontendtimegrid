@@ -18,6 +18,7 @@ export const useAuthStore = defineStore('auth', {
     accessToken: localStorage.getItem('accessToken'),
     refreshToken: localStorage.getItem('refreshToken'),
     isAuthenticated: !!localStorage.getItem('accessToken'),
+    isDemo: localStorage.getItem('isDemo') === 'true',
   }),
 
   getters: {
@@ -96,6 +97,19 @@ export const useAuthStore = defineStore('auth', {
     isReadOnly: (state) => {
       const role = state.user?.role;
       return role === 'auditor';
+    },
+    canDelete: (state) => {
+      return !state.isDemo;
+    },
+    canEdit: (state) => {
+      if (state.isDemo) return false;
+      const role = state.user?.role;
+      return role !== 'auditor';
+    },
+    canCreate: (state) => {
+      if (state.isDemo) return false;
+      const role = state.user?.role;
+      return role !== 'auditor';
     },
   },
 
@@ -178,10 +192,12 @@ export const useAuthStore = defineStore('auth', {
       this.accessToken = null;
       this.refreshToken = null;
       this.isAuthenticated = false;
+      this.isDemo = false;
 
       localStorage.removeItem('accessToken');
       localStorage.removeItem('refreshToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('isDemo');
     },
 
     initFromStorage() {
@@ -192,6 +208,7 @@ export const useAuthStore = defineStore('auth', {
         this.accessToken = storedToken;
         this.refreshToken = localStorage.getItem('refreshToken') || storedToken;
         this.isAuthenticated = true;
+        this.isDemo = localStorage.getItem('isDemo') === 'true';
         
         if (storedUser) {
           try {
@@ -203,6 +220,11 @@ export const useAuthStore = defineStore('auth', {
         return true;
       }
       return false;
+    },
+
+    setDemoMode(isDemo) {
+      this.isDemo = isDemo;
+      localStorage.setItem('isDemo', isDemo ? 'true' : 'false');
     },
   },
 });
