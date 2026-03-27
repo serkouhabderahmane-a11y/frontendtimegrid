@@ -311,7 +311,6 @@ import api from '../../api/axios'
 import { useAuthStore } from '../../stores/auth'
 
 const authStore = useAuthStore()
-const isDemoMode = computed(() => authStore.isDemo)
 
 const payPeriods = ref([])
 const selectedPeriod = ref(null)
@@ -487,13 +486,6 @@ const openExport = (period) => {
 }
 
 const exportPayroll = async () => {
-  // Demo mode check - show warning instead of real export
-  if (isDemoMode.value) {
-    showExportModal.value = false
-    alert('Demo Mode: Payroll export is simulated. In production, this would send data to ADP or another payroll provider. No real data is affected.')
-    return
-  }
-  
   try {
     const res = await api.post(`/payroll/pay-periods/${selectedPeriod.value.id}/export`, exportData.value)
     alert(`Payroll exported to ${exportData.value.provider} successfully! Hours marked as paid.`)

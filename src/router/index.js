@@ -85,11 +85,114 @@ const routes = [
     component: () => import('../views/admin/TrainingVideos.vue'),
     meta: { requiresAuth: true },
   },
+  // NEW MODULE ROUTES - ATTENDANCE
+  {
+    path: '/admin/attendance',
+    name: 'AdminAttendance',
+    component: () => import('../views/admin/attendance/AttendanceAdmin.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr', 'manager'] },
+  },
+  // NEW MODULE ROUTES - PATIENTS
+  {
+    path: '/admin/patients',
+    name: 'Patients',
+    component: () => import('../views/admin/patients/PatientsAdmin.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr'] },
+  },
+  // NEW MODULE ROUTES - TIME-OFF
+  {
+    path: '/admin/time-off',
+    name: 'AdminTimeOff',
+    component: () => import('../views/admin/time-off/TimeOffAdmin.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr', 'manager'] },
+  },
+  // NEW MODULE ROUTES - HOLIDAYS
+  {
+    path: '/admin/holidays',
+    name: 'Holidays',
+    component: () => import('../views/admin/holidays/HolidaysAdmin.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr'] },
+  },
+  // Account & Settings
+  {
+    path: '/profile',
+    name: 'Profile',
+    component: () => import('../views/Profile.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/preferences',
+    name: 'Preferences',
+    component: () => import('../views/Preferences.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/security',
+    name: 'Security',
+    component: () => import('../views/Security.vue'),
+    meta: { requiresAuth: true },
+  },
+  // System & Configuration
+  {
+    path: '/admin/audit-logs',
+    name: 'AuditLogs',
+    component: () => import('../views/admin/AuditLogs.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr'] },
+  },
+  {
+    path: '/admin/roles',
+    name: 'Roles',
+    component: () => import('../views/admin/Roles.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
+  {
+    path: '/admin/departments',
+    name: 'Departments',
+    component: () => import('../views/admin/Departments.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr'] },
+  },
+  {
+    path: '/admin/regions',
+    name: 'Regions',
+    component: () => import('../views/admin/Regions.vue'),
+    meta: { requiresAuth: true, roles: ['admin', 'hr'] },
+  },
+  {
+    path: '/admin/settings',
+    name: 'Settings',
+    component: () => import('../views/admin/Settings.vue'),
+    meta: { requiresAuth: true, roles: ['admin'] },
+  },
+  // Existing routes preserved
   {
     path: '/chat',
     name: 'Chat',
     component: () => import('../views/Chat.vue'),
     meta: { requiresAuth: true },
+  },
+  {
+    path: '/announcements',
+    name: 'Announcements',
+    component: () => import('../views/Announcements.vue'),
+    meta: { requiresAuth: true },
+  },
+  {
+    path: '/audit/dashboard',
+    name: 'AuditDashboard',
+    component: () => import('../views/audit/Dashboard.vue'),
+    meta: { requiresAuth: true, roles: ['auditor'] },
+  },
+  {
+    path: '/audit/logs',
+    name: 'AuditLogs',
+    component: () => import('../views/audit/Logs.vue'),
+    meta: { requiresAuth: true, roles: ['auditor'] },
+  },
+  {
+    path: '/reports',
+    name: 'Reports',
+    component: () => import('../views/Reports.vue'),
+    meta: { requiresAuth: true, roles: ['auditor', 'admin', 'hr'] },
   },
   // Employee Dashboard - for Staff, Nurse, Med Tech
   {
@@ -102,6 +205,20 @@ const routes = [
     path: '/employee/dashboard',
     name: 'EmployeeDashboard',
     component: () => import('../views/employee/Dashboard.vue'),
+    meta: { requiresAuth: true },
+  },
+  // NEW MODULE ROUTES - EMPLOYEE ATTENDANCE
+  {
+    path: '/employee/attendance',
+    name: 'EmployeeAttendance',
+    component: () => import('../views/employee/attendance/TimeClock.vue'),
+    meta: { requiresAuth: true },
+  },
+  // NEW MODULE ROUTES - EMPLOYEE TIME-OFF
+  {
+    path: '/employee/time-off',
+    name: 'EmployeeTimeOff',
+    component: () => import('../views/employee/time-off/TimeOffEmployee.vue'),
     meta: { requiresAuth: true },
   },
   // Catch-all redirect to appropriate dashboard
@@ -133,19 +250,15 @@ const EMPLOYEE_ROLES = ['employee', 'staff', 'nurse', 'med_tech']
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   
-  // Initialize from storage if not already done
   if (!authStore.accessToken && localStorage.getItem('accessToken')) {
     authStore.initFromStorage()
   }
 
   const isAuthenticated = authStore.isAuthenticated
-  const isDemo = authStore.accessToken?.startsWith('demo-')
   const userRole = authStore.role
 
-  // Guest routes (login, register)
   if (to.meta.guest) {
     if (isAuthenticated) {
-      // Redirect authenticated users away from guest routes
       const redirect = getDefaultDashboard(authStore.role)
       next(redirect)
       return
@@ -154,24 +267,14 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-  // Protected routes
   if (to.meta.requiresAuth) {
     if (!isAuthenticated) {
       next({ name: 'Login', query: { redirect: to.fullPath } })
       return
     }
 
-    // For demo mode, always allow access (bypass role checks)
-    if (isDemo) {
-      next()
-      return
-    }
-
-    // Check role-based access for non-demo users
     if (to.meta.roles) {
-      // Support both legacy and new role names
       const allowedRoles = [...to.meta.roles]
-      // Add mapped roles
       if (to.meta.roles.includes('admin')) {
         allowedRoles.push('tenant_admin', 'super_admin')
       }
@@ -193,8 +296,7 @@ router.beforeEach(async (to, from, next) => {
       }
     }
 
-    // Try to fetch user data if not present (non-demo)
-    if (isAuthenticated && !authStore.user && !isDemo) {
+    if (isAuthenticated && !authStore.user) {
       try {
         await authStore.fetchUser()
       } catch (e) {

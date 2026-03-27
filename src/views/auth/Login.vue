@@ -3,7 +3,6 @@
     <div class="login-bg"></div>
     
     <div class="login-container">
-      <!-- Left Panel - Branding -->
       <div class="login-brand">
         <div class="brand-content">
           <div class="logo">
@@ -44,19 +43,10 @@
         </div>
       </div>
       
-      <!-- Right Panel - Login Form -->
       <div class="login-form-container">
         <div class="login-form-wrapper">
           <h2>Welcome back</h2>
           <p class="form-subtitle">Sign in to your account</p>
-          
-          <!-- Demo Mode Banner -->
-          <div v-if="isDemoActive" class="demo-notice">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-            </svg>
-            <span>Demo mode active - Read-only access</span>
-          </div>
           
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
@@ -87,7 +77,7 @@
                   v-model="password"
                   type="password"
                   required
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   :disabled="loading"
                 />
               </div>
@@ -100,38 +90,6 @@
             </button>
           </form>
           
-          <div class="divider">
-            <span>or try a demo role</span>
-          </div>
-          
-          <!-- Demo Role Selection -->
-          <div class="demo-roles">
-            <p class="demo-title">Select a demo role to explore:</p>
-            <div class="demo-grid">
-              <button 
-                v-for="demo in demoRoles" 
-                :key="demo.role"
-                @click="handleDemoLogin(demo.role)"
-                class="demo-role-btn"
-                :class="demo.role"
-                :disabled="loading"
-              >
-                <div class="demo-role-icon">{{ demo.icon }}</div>
-                <div class="demo-role-info">
-                  <span class="demo-role-title">{{ demo.title }}</span>
-                  <span class="demo-role-desc">{{ demo.description }}</span>
-                </div>
-              </button>
-            </div>
-          </div>
-          
-          <div class="demo-warning">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
-            </svg>
-            <span>Demo sessions are read-only. No changes will be saved.</span>
-          </div>
-          
           <p class="register-link">
             Don't have an account? <router-link to="/register">Create one</router-link>
           </p>
@@ -142,58 +100,17 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
 
 const router = useRouter()
-const route = useRoute()
 const authStore = useAuthStore()
 
 const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
-const isDemoActive = ref(false)
-
-const demoRoles = ref([
-  {
-    role: 'hr_admin',
-    title: 'HR Admin',
-    icon: '👔',
-    description: 'Manage onboarding, training & users'
-  },
-  {
-    role: 'supervisor',
-    title: 'Supervisor',
-    icon: '👁️',
-    description: 'Approve timesheets & lock notes'
-  },
-  {
-    role: 'staff',
-    title: 'Staff',
-    icon: '👤',
-    description: 'Clock in/out & view schedule'
-  },
-  {
-    role: 'nurse',
-    title: 'Nurse',
-    icon: '🏥',
-    description: 'Care notes & medication MAR'
-  },
-  {
-    role: 'med_tech',
-    title: 'Med Tech',
-    icon: '💊',
-    description: 'Medication administration'
-  },
-  {
-    role: 'auditor',
-    title: 'Auditor',
-    icon: '📋',
-    description: 'Read-only compliance reports'
-  }
-])
 
 const handleLogin = async () => {
   loading.value = true
@@ -210,25 +127,7 @@ const handleLogin = async () => {
   }
 }
 
-const handleDemoLogin = async (role) => {
-  loading.value = true
-  error.value = ''
-
-  try {
-    await authStore.demoLogin(role)
-    isDemoActive.value = true
-    const redirect = getDashboardRoute(role)
-    router.push(redirect)
-  } catch (err) {
-    error.value = err.message || 'Demo login failed'
-    isDemoActive.value = false
-  } finally {
-    loading.value = false
-  }
-}
-
 const getDashboardRoute = (role) => {
-  // Map new roles to existing dashboard routes
   const routes = {
     'super_admin': '/admin',
     'tenant_admin': '/admin',
@@ -238,7 +137,6 @@ const getDashboardRoute = (role) => {
     'nurse': '/employee/timeclock',
     'med_tech': '/employee/timeclock',
     'auditor': '/admin',
-    // Legacy roles
     'admin': '/admin',
     'hr': '/admin',
     'manager': '/admin/daily-notes',
@@ -246,19 +144,6 @@ const getDashboardRoute = (role) => {
   }
   return routes[role] || '/admin'
 }
-
-onMounted(async () => {
-  // Check if demo mode from URL
-  if (route.query.demo) {
-    const demoRole = route.query.demo
-    if (demoRoles.value.some(d => d.role === demoRole)) {
-      await handleDemoLogin(demoRole)
-    }
-  }
-  
-  // Check if returning from demo
-  isDemoActive.value = authStore.isDemo
-})
 </script>
 
 <style scoped>
@@ -283,7 +168,6 @@ onMounted(async () => {
   min-height: 100vh;
 }
 
-/* Left Panel */
 .login-brand {
   flex: 1;
   background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
@@ -362,7 +246,6 @@ onMounted(async () => {
   color: #42b883;
 }
 
-/* Right Panel */
 .login-form-container {
   flex: 1;
   display: flex;
@@ -386,25 +269,6 @@ onMounted(async () => {
 .form-subtitle {
   color: #94a3b8;
   margin-bottom: 1.5rem;
-}
-
-.demo-notice {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(66, 184, 131, 0.15);
-  border: 1px solid rgba(66, 184, 131, 0.3);
-  color: #42b883;
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.demo-notice svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  flex-shrink: 0;
 }
 
 .login-form {
@@ -493,124 +357,9 @@ onMounted(async () => {
   cursor: not-allowed;
 }
 
-.divider {
-  display: flex;
-  align-items: center;
-  margin: 1.5rem 0;
-}
-
-.divider::before,
-.divider::after {
-  content: '';
-  flex: 1;
-  height: 1px;
-  background: #334155;
-}
-
-.divider span {
-  padding: 0 1rem;
-  color: #64748b;
-  font-size: 0.875rem;
-}
-
-/* Demo Roles */
-.demo-roles {
-  margin-bottom: 1rem;
-}
-
-.demo-title {
-  color: #94a3b8;
-  font-size: 0.875rem;
-  margin-bottom: 0.75rem;
-}
-
-.demo-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.75rem;
-}
-
-@media (max-width: 480px) {
-  .demo-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.demo-role-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem;
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: left;
-}
-
-.demo-role-btn:hover:not(:disabled) {
-  background: #334155;
-  border-color: #42b883;
-}
-
-.demo-role-btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.demo-role-icon {
-  font-size: 1.5rem;
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(66, 184, 131, 0.1);
-  border-radius: 0.5rem;
-}
-
-.demo-role-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.125rem;
-}
-
-.demo-role-title {
-  color: #f8fafc;
-  font-weight: 600;
-  font-size: 0.875rem;
-}
-
-.demo-role-desc {
-  color: #94a3b8;
-  font-size: 0.75rem;
-}
-
-/* Demo Warning */
-.demo-warning {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: rgba(251, 191, 36, 0.1);
-  border: 1px solid rgba(251, 191, 36, 0.2);
-  color: #fbbf24;
-  padding: 0.625rem;
-  border-radius: 0.5rem;
-  font-size: 0.75rem;
-  margin-bottom: 1rem;
-}
-
-.demo-warning svg {
-  width: 1rem;
-  height: 1rem;
-  flex-shrink: 0;
-}
-
 .register-link {
   text-align: center;
-  margin-top: 1rem;
+  margin-top: 1.5rem;
   color: #94a3b8;
   font-size: 0.875rem;
 }

@@ -1,10 +1,3 @@
-"""
-Permission Composable - Vue 3 Composition API
-
-Provides permission checking and role-based UI enforcement.
-Use in components to conditionally show/hide actions based on user permissions.
-"""
-
 import { computed, inject } from 'vue';
 
 const AUTH_KEY = Symbol('auth');
@@ -19,7 +12,6 @@ export function useAuth() {
       permissions: [],
       role: null,
       isAuthenticated: false,
-      isDemo: false,
       can: () => false,
       canAny: () => false,
       canAll: () => false,
@@ -31,13 +23,11 @@ export function useAuth() {
     permissions: computed(() => auth.user?.permissions || []),
     role: computed(() => auth.user?.role),
     isAuthenticated: computed(() => auth.isAuthenticated),
-    isDemo: computed(() => auth.user?.isDemo || false),
     
     can: (permission) => {
       const user = auth.user;
       if (!user) return false;
       
-      // Super admin has all permissions
       if (user.role === 'super_admin') return true;
       
       return user.permissions?.includes(permission) || false;
@@ -84,7 +74,6 @@ export function usePermissions() {
     canAll,
     permissions,
     
-    // Common permission checks
     canViewUsers: () => can('users.view'),
     canCreateUsers: () => can('users.create'),
     canEditUsers: () => can('users.edit'),
@@ -125,36 +114,6 @@ export function usePermissions() {
   };
 }
 
-export function useDemoMode() {
-  const { isDemo, role } = useAuth();
-  
-  const DEMO_READONLY_WARNING = 'This action is disabled in demo mode.';
-  
-  const assertNotDemo = (action = 'modify data') => {
-    if (isDemo.value) {
-      console.warn(`Demo mode: Cannot ${action}`);
-      return false;
-    }
-    return true;
-  };
-  
-  const demoBlocked = (callback, fallback = null) => {
-    if (isDemo.value) {
-      return fallback;
-    }
-    return callback();
-  };
-  
-  return {
-    isDemo: isDemo.value,
-    isDemoRole: role.value,
-    demoReadonly: isDemo.value,
-    assertNotDemo,
-    demoBlocked,
-    DEMO_READONLY_WARNING,
-  };
-}
-
 export function createAuthProvider(initialState = {}) {
   const user = ref(initialState.user || null);
   const isAuthenticated = ref(!!initialState.token);
@@ -165,7 +124,6 @@ export function createAuthProvider(initialState = {}) {
     token.value = authToken;
     isAuthenticated.value = true;
     
-    // Persist to storage
     localStorage.setItem('accessToken', authToken);
     localStorage.setItem('user', JSON.stringify(userData));
   };
@@ -202,7 +160,6 @@ export function createAuthProvider(initialState = {}) {
   };
 }
 
-// Helper for v-if based on permissions
 export function vIfPermission(el, binding) {
   const { can } = usePermissions();
   const requiredPermission = binding.value;
@@ -214,23 +171,11 @@ export function vIfPermission(el, binding) {
   }
 }
 
-// Directive for permission-based element visibility
 export const vPermission = {
   mounted(el, binding) {
     vIfPermission(el, binding);
   },
   updated(el, binding) {
     vIfPermission(el, binding);
-  },
-};
-
-// Directive for demo mode blocking
-export const vDemoBlock = {
-  mounted(el, binding) {
-    const { isDemo } = useDemoMode();
-    if (isDemo && binding.value !== false) {
-      el.style.pointerEvents = 'none';
-      el.style.opacity = '0.5';
-    }
   },
 };

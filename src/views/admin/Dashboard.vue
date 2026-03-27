@@ -1,13 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- Demo Mode Banner -->
-    <div v-if="isDemo" class="demo-banner">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <span>Demo Mode - {{ demoRoleLabel }} View</span>
-    </div>
-
     <header class="page-header">
       <div>
         <h1>{{ dashboardTitle }}</h1>
@@ -23,7 +15,6 @@
       </div>
     </header>
 
-    <!-- Error State -->
     <div v-if="hasError" class="error-banner">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -32,7 +23,6 @@
       <button @click="retry" class="retry-btn">Retry</button>
     </div>
 
-    <!-- Stats Grid -->
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-header">
@@ -86,7 +76,6 @@
     </div>
 
     <div class="dashboard-grid">
-      <!-- Candidates by Status -->
       <div class="card">
         <div class="card-header">
           <h2>Candidates by Status</h2>
@@ -103,7 +92,6 @@
         </div>
       </div>
 
-      <!-- Quick Actions -->
       <div class="card">
         <div class="card-header">
           <h2>Quick Actions</h2>
@@ -139,7 +127,7 @@
             </svg>
           </router-link>
           
-          <div class="action-item" :class="{ 'demo-disabled': isDemo }">
+          <div class="action-item">
             <div class="action-icon">
               <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
@@ -147,7 +135,7 @@
             </div>
             <div class="action-content">
               <span class="action-title">Export Reports</span>
-              <span class="action-desc">{{ isDemo ? 'Disabled in demo mode' : 'Download onboarding data' }}</span>
+              <span class="action-desc">Download onboarding data</span>
             </div>
             <svg class="action-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
@@ -160,30 +148,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onErrorCaptured } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
 
 const authStore = useAuthStore()
 
-// State
 const loading = ref(true)
 const hasError = ref(false)
 const errorMessage = ref('')
 const stats = ref(null)
-
-// Computed
-const isDemo = computed(() => authStore.accessToken?.startsWith('demo-') || authStore.isDemo)
-
-const demoRoleLabel = computed(() => {
-  const labels = {
-    'hr_admin': 'HR Admin',
-    'supervisor': 'Supervisor',
-    'staff': 'Staff',
-    'nurse': 'Nurse',
-    'auditor': 'Auditor',
-  }
-  return labels[authStore.role] || 'Demo'
-})
 
 const dashboardTitle = computed(() => {
   const titles = {
@@ -195,36 +168,24 @@ const dashboardTitle = computed(() => {
 })
 
 const canAddCandidate = computed(() => {
-  return authStore.hasPermission('users.create') && !isDemo.value
+  return authStore.hasPermission('users.create')
 })
 
-// Demo fallback data
-const demoStats = {
-  totalCandidates: 24,
-  activeEmployees: 156,
-  pendingApprovals: 8,
-  inProgress: 12,
-  candidatesByState: {
-    candidate_created: 5,
-    packet_assigned: 3,
-    in_progress: 12,
-    pending_hr_review: 8,
-    approved: 45,
-    employee_active: 156
-  }
-}
-
-// Display stats with fallback
 const displayStats = computed(() => {
   if (stats.value) {
     return stats.value
   }
-  // Return demo fallback data
-  return demoStats
+  return {
+    totalCandidates: 0,
+    activeEmployees: 0,
+    pendingApprovals: 0,
+    inProgress: 0,
+    candidatesByState: {}
+  }
 })
 
 const candidateStatusList = computed(() => {
-  const states = displayStats.value?.candidatesByState || demoStats.candidatesByState
+  const states = displayStats.value?.candidatesByState || {}
   return [
     { label: 'New', class: 'candidate_created', count: states.candidate_created || 0 },
     { label: 'Assigned', class: 'packet_assigned', count: states.packet_assigned || 0 },
@@ -234,31 +195,22 @@ const candidateStatusList = computed(() => {
   ]
 })
 
-// Methods
 const fetchStats = async () => {
   loading.value = true
   hasError.value = false
   errorMessage.value = ''
 
   try {
-    if (isDemo.value) {
-      // Use demo data
-      stats.value = demoStats
+    const response = await fetch(`/api/dashboard/stats?tenant_id=${authStore.user?.tenantId}`)
+    if (response.ok) {
+      stats.value = await response.json()
     } else {
-      // Try to fetch from API
-      const response = await fetch(`/api/dashboard/stats?tenant_id=${authStore.user?.tenantId}`)
-      if (response.ok) {
-        stats.value = await response.json()
-      } else {
-        throw new Error('Failed to fetch dashboard data')
-      }
+      throw new Error('Failed to fetch dashboard data')
     }
   } catch (error) {
     console.error('Dashboard load error:', error)
     hasError.value = true
-    errorMessage.value = 'Failed to load dashboard data. Using demo data.'
-    // Use demo fallback
-    stats.value = demoStats
+    errorMessage.value = 'Failed to load dashboard data.'
   } finally {
     loading.value = false
   }
@@ -267,14 +219,6 @@ const fetchStats = async () => {
 const retry = () => {
   fetchStats()
 }
-
-// Error boundary
-onErrorCaptured((error) => {
-  console.error('Dashboard error captured:', error)
-  hasError.value = true
-  errorMessage.value = 'An error occurred. Please refresh the page.'
-  return false // Prevent error propagation
-})
 
 onMounted(() => {
   fetchStats()
@@ -288,27 +232,6 @@ onMounted(() => {
   padding: 2rem;
 }
 
-/* Demo Banner */
-.demo-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(90deg, rgba(66, 184, 131, 0.15), rgba(66, 184, 131, 0.05));
-  border: 1px solid rgba(66, 184, 131, 0.3);
-  color: #42b883;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-}
-
-.demo-banner svg {
-  width: 1.25rem;
-  height: 1.25rem;
-}
-
-/* Error Banner */
 .error-banner {
   display: flex;
   align-items: center;
@@ -377,13 +300,6 @@ onMounted(() => {
   background: #359268;
 }
 
-.btn-primary.demo-disabled,
-.btn-primary:disabled {
-  background: #64748b;
-  cursor: not-allowed;
-}
-
-/* Stats Grid */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -448,7 +364,6 @@ onMounted(() => {
   color: #94a3b8;
 }
 
-/* Dashboard Grid */
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -485,7 +400,6 @@ onMounted(() => {
   text-decoration: underline;
 }
 
-/* Status List */
 .status-list {
   display: flex;
   flex-direction: column;
@@ -530,7 +444,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Actions List */
 .actions-list {
   display: flex;
   flex-direction: column;
@@ -551,11 +464,6 @@ onMounted(() => {
 
 .action-item:hover {
   background: #1e293b;
-}
-
-.action-item.demo-disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .action-icon {

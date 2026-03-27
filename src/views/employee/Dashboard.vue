@@ -1,13 +1,5 @@
 <template>
   <div class="dashboard">
-    <!-- Demo Mode Banner -->
-    <div v-if="isDemo" class="demo-banner">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-      </svg>
-      <span>Demo Mode - {{ demoRoleLabel }} View</span>
-    </div>
-
     <header class="page-header">
       <div>
         <h1>Hello, {{ userName }}</h1>
@@ -19,7 +11,6 @@
       </div>
     </header>
 
-    <!-- Error State -->
     <div v-if="hasError" class="error-banner">
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
@@ -27,7 +18,6 @@
       <span>{{ errorMessage }}</span>
     </div>
 
-    <!-- Clock In/Out Card -->
     <div class="clock-card" :class="{ 'clocked-in': isClockedIn }">
       <div class="clock-time">
         <span class="time">{{ currentTime }}</span>
@@ -37,16 +27,11 @@
         class="clock-btn" 
         :class="isClockedIn ? 'clock-out' : 'clock-in'"
         @click="handleClockAction"
-        :disabled="isDemo"
       >
         {{ isClockedIn ? 'Clock Out' : 'Clock In' }}
       </button>
-      <div v-if="isDemo" class="demo-notice">
-        Clock actions disabled in demo mode
-      </div>
     </div>
 
-    <!-- Quick Actions -->
     <div class="section">
       <h2 class="section-title">Quick Actions</h2>
       <div class="actions-grid">
@@ -59,7 +44,7 @@
           <span class="action-label">Time Clock</span>
         </router-link>
         
-        <div class="action-card" @click="handleAddNote" :class="{ disabled: isDemo }">
+        <div class="action-card" @click="handleAddNote">
           <div class="action-icon green">
             <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
@@ -79,7 +64,6 @@
       </div>
     </div>
 
-    <!-- Assigned Participants (for nurses/staff) -->
     <div v-if="showParticipants" class="section">
       <h2 class="section-title">My Assignments</h2>
       <div class="participants-list">
@@ -99,7 +83,6 @@
       </div>
     </div>
 
-    <!-- Today's Notes -->
     <div class="section">
       <h2 class="section-title">Today's Notes</h2>
       <div class="notes-list">
@@ -118,10 +101,10 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useAuthStore } from '../../stores/auth'
+import api from '../../api/axios'
 
 const authStore = useAuthStore()
 
-// State
 const hasError = ref(false)
 const errorMessage = ref('')
 const isClockedIn = ref(false)
@@ -132,24 +115,12 @@ const participants = ref([])
 const recentNotes = ref([])
 let timeInterval = null
 
-// Computed
-const isDemo = computed(() => authStore.accessToken?.startsWith('demo-') || authStore.isDemo)
-
 const userName = computed(() => {
   const user = authStore.user
   if (user?.firstName && user?.lastName) {
     return `${user.firstName} ${user.lastName}`
   }
   return authStore.user?.email?.split('@')[0] || 'User'
-})
-
-const demoRoleLabel = computed(() => {
-  const labels = {
-    'staff': 'Staff',
-    'nurse': 'Nurse',
-    'med_tech': 'Med Tech',
-  }
-  return labels[authStore.role] || 'Employee'
 })
 
 const welcomeMessage = computed(() => {
@@ -174,53 +145,42 @@ const showParticipants = computed(() => {
   return ['nurse', 'med_tech', 'staff'].includes(authStore.role)
 })
 
-// Demo data
-const demoParticipants = [
-  { id: '1', name: 'John Smith', initials: 'JS', type: 'Patient' },
-  { id: '2', name: 'Jane Doe', initials: 'JD', type: 'Patient' }
-]
-
-const demoNotes = [
-  { id: '1', content: 'Patient showing improvement in condition', time: '10:30 AM' },
-  { id: '2', content: 'Medication administered as scheduled', time: '09:15 AM' }
-]
-
-// Methods
 const updateTime = () => {
   const now = new Date()
   currentTime.value = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
   currentDate.value = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
 }
 
-const handleClockAction = () => {
-  if (isDemo.value) {
-    alert('Clock in/out is disabled in demo mode')
-    return
-  }
-  
-  if (isClockedIn.value) {
-    isClockedIn.value = false
-    clockInTime.value = null
-  } else {
-    isClockedIn.value = true
-    clockInTime.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+const handleClockAction = async () => {
+  try {
+    if (isClockedIn.value) {
+      await api.post('/attendance/clock-out')
+      isClockedIn.value = false
+      clockInTime.value = null
+    } else {
+      const res = await api.post('/attendance/clock-in')
+      isClockedIn.value = true
+      clockInTime.value = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    }
+  } catch (err) {
+    console.error('Clock action failed:', err)
+    alert('Failed to record time. Please try again.')
   }
 }
 
 const handleAddNote = () => {
-  if (isDemo.value) {
-    alert('Adding notes is disabled in demo mode')
-    return
-  }
   // Navigate to add note
 }
 
-const loadData = () => {
-  // Load demo data
-  if (isDemo.value) {
-    participants.value = demoParticipants
-    recentNotes.value = demoNotes
-    isClockedIn.value = false
+const loadData = async () => {
+  try {
+    const res = await api.get('/attendance/status')
+    if (res.data) {
+      isClockedIn.value = res.data.isClockedIn || false
+      clockInTime.value = res.data.clockInTime
+    }
+  } catch (err) {
+    console.error('Failed to load attendance status:', err)
   }
 }
 
@@ -249,22 +209,6 @@ onUnmounted(() => {
   padding: 2rem;
 }
 
-/* Demo Banner */
-.demo-banner {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  background: linear-gradient(90deg, rgba(66, 184, 131, 0.15), rgba(66, 184, 131, 0.05));
-  border: 1px solid rgba(66, 184, 131, 0.3);
-  color: #42b883;
-  padding: 0.75rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1.5rem;
-  font-weight: 500;
-}
-
-/* Error Banner */
 .error-banner {
   display: flex;
   align-items: center;
@@ -322,7 +266,6 @@ onUnmounted(() => {
   background: currentColor;
 }
 
-/* Clock Card */
 .clock-card {
   background: #1e293b;
   border: 2px solid #334155;
@@ -383,18 +326,6 @@ onUnmounted(() => {
   background: #dc2626;
 }
 
-.clock-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.demo-notice {
-  margin-top: 1rem;
-  color: #94a3b8;
-  font-size: 0.875rem;
-}
-
-/* Section */
 .section {
   background: #1e293b;
   border: 1px solid #334155;
@@ -410,7 +341,6 @@ onUnmounted(() => {
   margin-bottom: 1rem;
 }
 
-/* Actions Grid */
 .actions-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -429,11 +359,6 @@ onUnmounted(() => {
 
 .action-card:hover {
   background: #1e293b;
-}
-
-.action-card.disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .action-icon {
@@ -462,7 +387,6 @@ onUnmounted(() => {
   font-size: 0.875rem;
 }
 
-/* Participants */
 .participants-list {
   display: flex;
   flex-direction: column;
@@ -517,7 +441,6 @@ onUnmounted(() => {
   cursor: pointer;
 }
 
-/* Notes */
 .notes-list {
   display: flex;
   flex-direction: column;
@@ -541,7 +464,6 @@ onUnmounted(() => {
   font-size: 0.75rem;
 }
 
-/* Empty State */
 .empty-state {
   text-align: center;
   padding: 2rem;

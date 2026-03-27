@@ -13,7 +13,6 @@
         <div class="progress-bar">
           <div class="progress-fill" :style="{ width: progressPercent + '%' }"></div>
         </div>
-        <button v-if="isDemoMode" @click="resetDemo" class="btn-reset">Reset Demo</button>
       </div>
     </header>
 
@@ -933,56 +932,6 @@ const i9TypedSignature = ref('')
 // Offer letter data
 const offerLetterData = ref(null)
 
-const STORAGE_KEY = 'onboarding_demo_data'
-const CURRENT_STEP_KEY = 'onboarding_current_step'
-
-const loadSavedData = () => {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved) {
-      return JSON.parse(saved)
-    }
-  } catch (e) {
-    console.error('Error loading saved data:', e)
-  }
-  return null
-}
-
-const saveData = (data) => {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data))
-  } catch (e) {
-    console.error('Error saving data:', e)
-  }
-}
-
-const saveCurrentStep = (stepIndex) => {
-  try {
-    localStorage.setItem(CURRENT_STEP_KEY, JSON.stringify({
-      stepIndex,
-      timestamp: new Date().toISOString()
-    }))
-  } catch (e) {}
-}
-
-const loadCurrentStep = () => {
-  try {
-    const saved = localStorage.getItem(CURRENT_STEP_KEY)
-    if (saved) {
-      return JSON.parse(saved)
-    }
-  } catch (e) {}
-  return null
-}
-
-const getSavedFormData = (taskId, taskType) => {
-  const saved = loadSavedData()
-  if (saved && saved[taskId]) {
-    return saved[taskId]
-  }
-  return null
-}
-
 const userIP = ref('192.168.1.1')
 
 const formData = ref({})
@@ -1189,14 +1138,7 @@ const fetchTrainingVideos = async (trainingId) => {
   hasLoadedVideos.value = false
   
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    let response
-    
-    if (isDemo) {
-      response = await api.get(`/onboarding/training/${trainingId}/videos`)
-    } else {
-      response = await api.get(`/onboarding/training/${trainingId}/videos`)
-    }
+    const response = await api.get(`/onboarding/training/${trainingId}/videos`)
     
     if (response.data) {
       const savedProgress = loadTrainingProgress()
@@ -1228,41 +1170,9 @@ const fetchTrainingVideos = async (trainingId) => {
   } catch (err) {
     console.error('Failed to fetch training videos:', err)
     trainingError.value = 'Failed to load training videos. Please try again.'
-    
-    if (localStorage.getItem('accessToken')?.startsWith('demo-')) {
-      trainingVideos.value = getDemoFallbackVideos()
-      hasLoadedVideos.value = true
-    }
   } finally {
     trainingLoading.value = false
   }
-}
-
-const getDemoFallbackVideos = () => {
-  return [
-    {
-      id: 'demo-vid-1',
-      title: 'Workplace Safety Fundamentals',
-      description: 'Learn essential workplace safety protocols and emergency procedures.',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      video_source: 'url',
-      duration_seconds: 600,
-      is_required: true,
-      completion_threshold: 95,
-      progress: { watched_seconds: 0, completion_percentage: 0, is_completed: false }
-    },
-    {
-      id: 'demo-vid-2',
-      title: 'Harassment Prevention Training',
-      description: 'Understanding and preventing workplace harassment.',
-      video_url: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-      video_source: 'url',
-      duration_seconds: 1200,
-      is_required: true,
-      completion_threshold: 95,
-      progress: { watched_seconds: 0, completion_percentage: 0, is_completed: false }
-    },
-  ]
 }
 
 const simulateVideoWatch = () => {
@@ -1313,48 +1223,33 @@ const toggleVideoPlayback = () => {
 
 const fetchOfferLetterData = async () => {
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    if (isDemo) {
-      offerLetterData.value = {
-        title: 'Employment Offer Letter',
-        version: '1.0',
-        content: null
-      }
-    } else {
-      const response = await api.get(`/onboarding/${onboarding.value?.id}/offer-letter`)
-      if (response.data) {
-        offerLetterData.value = response.data
-      }
+    const response = await api.get(`/onboarding/${onboarding.value?.id}/offer-letter`)
+    if (response.data) {
+      offerLetterData.value = response.data
     }
   } catch (err) {
     console.error('Failed to fetch offer letter:', err)
   }
 }
 
-// Government Forms Persistence Functions
 const fetchGovFormsStatus = async () => {
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    if (isDemo) {
-      const response = await api.get('/onboarding/government-forms/draft')
-      const result = response.data
-      
-      govFormsStatus.value = result.status
-      govFormsVersion.value = result.version || '1.0'
-      
-      if (result.status === 'draft' && result.draft) {
-        // Load saved draft into form
-        formData.value = { ...formData.value, ...result.draft }
-        govFormsDraftSaved.value = result.savedAt
-        govFormsLastSaved.value = result.draft.savedAt
-        console.log('[Gov Forms] Loaded draft from server')
-      } else if (result.status === 'submitted' && result.snapshot) {
-        // Load submitted snapshot (read-only mode)
-        formData.value = { ...formData.value, ...result.snapshot }
-        console.log('[Gov Forms] Loaded submitted snapshot')
-      } else {
-        console.log('[Gov Forms] No existing data found')
-      }
+    const response = await api.get('/onboarding/government-forms/draft')
+    const result = response.data
+    
+    govFormsStatus.value = result.status
+    govFormsVersion.value = result.version || '1.0'
+    
+    if (result.status === 'draft' && result.draft) {
+      formData.value = { ...formData.value, ...result.draft }
+      govFormsDraftSaved.value = result.savedAt
+      govFormsLastSaved.value = result.draft.savedAt
+      console.log('[Gov Forms] Loaded draft from server')
+    } else if (result.status === 'submitted' && result.snapshot) {
+      formData.value = { ...formData.value, ...result.snapshot }
+      console.log('[Gov Forms] Loaded submitted snapshot')
+    } else {
+      console.log('[Gov Forms] No existing data found')
     }
   } catch (err) {
     console.error('Failed to fetch government forms status:', err)
@@ -1367,37 +1262,34 @@ const saveGovFormsDraft = async (showNotification = true) => {
   
   govFormsSaving.value = true
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    if (isDemo) {
-      const draftData = {
-        w4FilingStatus: formData.value.w4FilingStatus,
-        w4Dependents: formData.value.w4Dependents,
-        w4OtherIncome: formData.value.w4OtherIncome,
-        w4Deductions: formData.value.w4Deductions,
-        w4ExtraWithholding: formData.value.w4ExtraWithholding,
-        w4TypedSignature: formData.value.w4TypedSignature,
-        w4AttestationConfirmed: formData.value.w4AttestationConfirmed,
-        i9DocType: formData.value.i9DocType,
-        i9DocNumber: formData.value.i9DocNumber,
-        i9Expiration: formData.value.i9Expiration,
-        i9Status: formData.value.i9Status,
-        i9TypedSignature: formData.value.i9TypedSignature,
-        i9AttestationConfirmed: formData.value.i9AttestationConfirmed,
-        i9UploadedFile: formData.value.i9UploadedFile,
-        i9UploadedFileData: formData.value.i9UploadedFileData,
-      }
+    const draftData = {
+      w4FilingStatus: formData.value.w4FilingStatus,
+      w4Dependents: formData.value.w4Dependents,
+      w4OtherIncome: formData.value.w4OtherIncome,
+      w4Deductions: formData.value.w4Deductions,
+      w4ExtraWithholding: formData.value.w4ExtraWithholding,
+      w4TypedSignature: formData.value.w4TypedSignature,
+      w4AttestationConfirmed: formData.value.w4AttestationConfirmed,
+      i9DocType: formData.value.i9DocType,
+      i9DocNumber: formData.value.i9DocNumber,
+      i9Expiration: formData.value.i9Expiration,
+      i9Status: formData.value.i9Status,
+      i9TypedSignature: formData.value.i9TypedSignature,
+      i9AttestationConfirmed: formData.value.i9AttestationConfirmed,
+      i9UploadedFile: formData.value.i9UploadedFile,
+      i9UploadedFileData: formData.value.i9UploadedFileData,
+    }
+    
+    const response = await api.post('/onboarding/government-forms/draft', draftData)
+    
+    if (response.data.success) {
+      govFormsStatus.value = 'draft'
+      govFormsDraftSaved.value = new Date().toISOString()
+      govFormsLastSaved.value = new Date().toISOString()
+      logAuditEvent('GOV_FORMS_DRAFT_SAVED', { savedAt: govFormsDraftSaved.value })
       
-      const response = await api.post('/onboarding/government-forms/draft', draftData)
-      
-      if (response.data.success) {
-        govFormsStatus.value = 'draft'
-        govFormsDraftSaved.value = new Date().toISOString()
-        govFormsLastSaved.value = new Date().toISOString()
-        logAuditEvent('GOV_FORMS_DRAFT_SAVED', { savedAt: govFormsDraftSaved.value })
-        
-        if (showNotification) {
-          console.log('[Gov Forms] Draft saved successfully')
-        }
+      if (showNotification) {
+        console.log('[Gov Forms] Draft saved successfully')
       }
     }
   } catch (err) {
@@ -1435,19 +1327,6 @@ const progressPercent = computed(() => {
 })
 
 const requiredTasks = computed(() => taskStatuses.value.filter(t => t.task?.isRequired))
-
-const isDemoMode = computed(() => {
-  return localStorage.getItem('accessToken')?.startsWith('demo-')
-})
-
-const resetDemo = () => {
-  if (confirm('Are you sure you want to reset all your progress?')) {
-    localStorage.removeItem(STORAGE_KEY)
-    localStorage.removeItem(TRAINING_PROGRESS_KEY)
-    localStorage.removeItem(CURRENT_STEP_KEY)
-    window.location.reload()
-  }
-}
 
 const canAccessTask = (index) => {
   const task = taskStatuses.value[index]
@@ -1773,70 +1652,37 @@ const submitTask = async () => {
       }
     }
     
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    const currentTaskId = currentTask.value.taskId
+    if (currentTask.value?.task?.type === 'government_forms') {
+      const submitResponse = await api.post('/onboarding/government-forms/submit', {
+        ...formData.value
+      })
+      
+      if (submitResponse.error) {
+        alert(submitResponse.error.message)
+        return
+      }
+      
+      govFormsStatus.value = 'submitted'
+      logAuditEvent('GOV_FORMS_SUBMITTED', {
+        snapshotId: submitResponse.data?.snapshotId,
+        submittedAt: submitResponse.data?.submittedAt
+      })
+    }
     
-    if (isDemo) {
-      // Government forms submission uses server-side API for snapshot integrity
-      if (currentTask.value?.task?.type === 'government_forms') {
-        // Submit via server API to create immutable snapshot
-        const submitResponse = await api.post('/onboarding/government-forms/submit', {
-          ...formData.value
-        })
-        
-        if (submitResponse.error) {
-          alert(submitResponse.error.message)
-          return
-        }
-        
-        govFormsStatus.value = 'submitted'
-        logAuditEvent('GOV_FORMS_SUBMITTED', {
-          snapshotId: submitResponse.data?.snapshotId,
-          submittedAt: submitResponse.data?.submittedAt
-        })
-      } else {
-        const savedData = loadSavedData() || {}
-        savedData[currentTaskId] = { ...formData.value }
-        saveData(savedData)
-      }
-      
-      const taskIndex = taskStatuses.value.findIndex(t => t.taskId === currentTaskId)
-      if (taskIndex !== -1) {
-        taskStatuses.value[taskIndex].status = 'submitted'
-        taskStatuses.value[taskIndex].submissionData = formData.value
-        taskStatuses.value[taskIndex].submittedAt = new Date()
-      }
-      
-      logAuditEvent('STEP_COMPLETED', { 
-        taskId: currentTaskId,
-        taskType: currentTask.value?.task?.type
-      })
-      
-      await new Promise(r => setTimeout(r, 500))
-      
-      // USER EXPLICITLY SUBMITS - advance to next task
-      if (currentTaskIndex.value < taskStatuses.value.length - 1) {
-        await selectTask(currentTaskIndex.value + 1)
-      } else {
-        submittedTask.value = currentTask.value.task?.name
-        showConfirmation.value = true
-      }
+    await api.post(`/onboarding/${onboarding.value.id}/tasks/${currentTask.value.taskId}/submit`, {
+      submissionData: formData.value
+    })
+    
+    logAuditEvent('STEP_COMPLETED', { 
+      taskId: currentTask.value.taskId,
+      taskType: currentTask.value?.task?.type
+    })
+    
+    if (currentTaskIndex.value < taskStatuses.value.length - 1) {
+      await selectTask(currentTaskIndex.value + 1)
     } else {
-      await api.post(`/onboarding/${onboarding.value.id}/tasks/${currentTask.value.taskId}/submit`, {
-        submissionData: formData.value
-      })
-      
-      logAuditEvent('STEP_COMPLETED', { 
-        taskId: currentTaskId,
-        taskType: currentTask.value?.task?.type
-      })
-      
-      if (currentTaskIndex.value < taskStatuses.value.length - 1) {
-        await selectTask(currentTaskIndex.value + 1)
-      } else {
-        submittedTask.value = currentTask.value.task?.name
-        showConfirmation.value = true
-      }
+      submittedTask.value = currentTask.value.task?.name
+      showConfirmation.value = true
     }
   } catch (err) {
     console.error('Submit error:', err)
@@ -1856,56 +1702,11 @@ const closeConfirmation = () => {
 
 onMounted(async () => {
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    let data
-    if (isDemo) {
-      const savedData = loadSavedData()
-      const savedStep = loadCurrentStep()
-      
-      data = { 
-        id: 'onboarding-1', 
-        currentState: 'in_progress',
-        candidate: { 
-          firstName: 'John', 
-          lastName: 'Doe', 
-          email: 'john@example.com',
-          phone: '555-0101',
-          position: 'Software Engineer', 
-          startDate: '2024-01-15', 
-          employmentType: 'full-time',
-          address: '123 Main Street',
-          city: 'San Francisco',
-          state: 'CA',
-          zipCode: '94102'
-        },
-        taskStatuses: [
-          { taskId: 't1', task: { name: 'Personal Information', type: 'personal_info', description: 'Complete your personal profile', isRequired: true, order: 1 }, status: savedData?.['t1'] ? 'submitted' : 'draft' },
-          { taskId: 't2', task: { name: 'Offer Letter', type: 'offer_letter', description: 'Review and sign your offer letter', isRequired: true, order: 2 }, status: savedData?.['t2'] ? 'submitted' : 'draft' },
-          { taskId: 't3', task: { name: 'Government Forms', type: 'government_forms', description: 'W-4 and I-9 tax forms', isRequired: true, order: 3 }, status: savedData?.['t3'] ? 'submitted' : 'draft' },
-          { taskId: 't4', task: { name: 'Document Upload', type: 'document_upload', description: 'Upload optional documents (ID, certifications)', isRequired: false, order: 4 }, status: savedData?.['t4'] ? 'submitted' : 'draft' },
-          { taskId: 't5', task: { name: 'Policy Acknowledgement', type: 'policy_acknowledgment', description: 'Review and acknowledge company policies', isRequired: true, order: 5 }, status: savedData?.['t5'] ? 'submitted' : 'draft' },
-          { taskId: 't6', task: { name: 'Training Acknowledgement', type: 'training_acknowledgment', description: 'Complete required training', isRequired: true, order: 6 }, status: savedData?.['t6'] ? 'submitted' : 'draft' },
-          { taskId: 't7', task: { name: 'E-Signature', type: 'e_signature', description: 'Sign NDA and other documents', isRequired: true, order: 7 }, status: savedData?.['t7'] ? 'submitted' : 'draft' },
-          { taskId: 't8', task: { name: 'Role Confirmation', type: 'role_confirmation', description: 'Review and confirm your role', isRequired: true, order: 8 }, status: savedData?.['t8'] ? 'submitted' : 'draft' },
-        ]
-      }
-      
-      if (savedData) {
-        for (const taskId in savedData) {
-          const taskStatus = data.taskStatuses.find(t => t.taskId === taskId)
-          if (taskStatus) {
-            taskStatus.submissionData = savedData[taskId]
-          }
-        }
-      }
-    } else {
-      const response = await api.get(`/onboarding/token/${token}`)
-      data = response.data
-    }
+    const response = await api.get(`/onboarding/token/${token}`)
+    const data = response.data
     onboarding.value = data
     taskStatuses.value = data.taskStatuses || []
     
-    // RESUME at last incomplete step (not step 3 by default)
     const firstIncompleteIndex = taskStatuses.value.findIndex(t => t.status !== 'submitted' && t.status !== 'approved')
     
     if (firstIncompleteIndex !== null && firstIncompleteIndex >= 0) {
@@ -2014,21 +1815,6 @@ onUnmounted(async () => {
   background: #42b883;
   border-radius: 4px;
   transition: width 0.3s;
-}
-
-.btn-reset {
-  background: #ef4444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  font-size: 0.75rem;
-  cursor: pointer;
-  margin-left: auto;
-}
-
-.btn-reset:hover {
-  background: #dc2626;
 }
 
 .portal-content {

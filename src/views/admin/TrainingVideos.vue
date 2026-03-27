@@ -246,8 +246,6 @@
 import { ref, onMounted } from 'vue'
 import api from '../../api/axios'
 
-const DEMO_TRAINING_VIDEOS_STORAGE_KEY = 'demo_training_videos'
-
 const loading = ref(true)
 const error = ref(null)
 const videos = ref([])
@@ -272,10 +270,10 @@ const videoForm = ref({
   duration: null,
   order: 1,
   is_required: true,
-  sourceType: 'url', // 'url' or 'upload'
+  sourceType: 'url',
   uploadFile: null,
   completion_threshold: 95,
-  training_task_id: 'training-acknowledgment', // Default to training acknowledgment task
+  training_task_id: 'training-acknowledgment',
 })
 
 onMounted(async () => {
@@ -286,18 +284,6 @@ const loadSettings = async () => {
   loading.value = true
   error.value = null
   
-  // Load from localStorage first (persisted uploads)
-  const storedVideos = localStorage.getItem(DEMO_TRAINING_VIDEOS_STORAGE_KEY)
-  if (storedVideos) {
-    try {
-      videos.value = JSON.parse(storedVideos)
-      loading.value = false
-      return
-    } catch (e) {
-      console.error('Failed to parse stored videos:', e)
-    }
-  }
-  
   try {
     const res = await api.get('/onboarding/training-videos/settings')
     if (res.data) {
@@ -305,27 +291,14 @@ const loadSettings = async () => {
       if (res.data.settings) {
         settings.value = { ...settings.value, ...res.data.settings }
       }
-      // Persist to localStorage
-      persistVideos()
     }
   } catch (err) {
     console.error('Failed to load training settings:', err)
-    // Use demo data if API fails
-    videos.value = getDemoVideos()
+    error.value = 'Failed to load training settings'
   } finally {
     loading.value = false
   }
 }
-
-const persistVideos = () => {
-  localStorage.setItem(DEMO_TRAINING_VIDEOS_STORAGE_KEY, JSON.stringify(videos.value))
-}
-
-const getDemoVideos = () => [
-  { id: '1', title: 'Workplace Safety', description: 'Essential safety protocols', url: 'https://youtube.com/embed/dQw4w9WgXcQ', duration: 15, order: 1, is_required: true },
-  { id: '2', title: 'Harassment Prevention', description: 'Anti-harassment training', url: 'https://youtube.com/embed/dQw4w9WgXcQ', duration: 20, order: 2, is_required: true },
-  { id: '3', title: 'Company Culture', description: 'Learn about our values', url: 'https://youtube.com/embed/dQw4w9WgXcQ', duration: 10, order: 3, is_required: false },
-]
 
 const saveSettings = async () => {
   try {
@@ -353,25 +326,19 @@ const deleteVideo = async (id) => {
   
   try {
     await api.delete(`/onboarding/training-videos/${id}`)
+    videos.value = videos.value.filter(v => v.id !== id)
   } catch (err) {
     console.error('Failed to delete video:', err)
   }
-  // Always remove locally and persist
-  videos.value = videos.value.filter(v => v.id !== id)
-  persistVideos()
 }
 
 const saveVideo = async () => {
   saving.value = true
   try {
-    const isDemo = localStorage.getItem('accessToken')?.startsWith('demo-')
-    
     if (videoForm.value.sourceType === 'upload' && videoForm.value.uploadFile && !editingVideo.value) {
-      // Upload file first
       uploading.value = true
       uploadProgress.value = 0
       
-      // Get the training task ID - required for videos to be visible to employees
       const trainingTaskId = videoForm.value.training_task_id || 'training-acknowledgment'
       
       const formData = new FormData()
@@ -382,7 +349,6 @@ const saveVideo = async () => {
       formData.append('completion_threshold', videoForm.value.completion_threshold)
       formData.append('training_task_id', trainingTaskId)
       
-      // Simulate progress for demo
       const progressInterval = setInterval(() => {
         if (uploadProgress.value < 90) {
           uploadProgress.value += 10
@@ -407,52 +373,54 @@ const saveVideo = async () => {
           completion_threshold: videoForm.value.completion_threshold,
           training_task_id: res.data.training_task_id,
         })
-        persistVideos()
       } catch (err) {
         clearInterval(progressInterval)
-        console.error('Upload failed, using demo mode:', err)
-        // Demo mode - save locally with task assignment
-        videos.value.push({
-          id: 'demo-' + Date.now(),
-          title: videoForm.value.title,
-          description: videoForm.value.description,
-          url: URL.createObjectURL(videoForm.value.uploadFile),
-          duration: videoForm.value.duration,
-          is_required: videoForm.value.is_required,
-          video_source: 'uploaded',
-          completion_threshold: videoForm.value.completion_threshold,
-          training_task_id: trainingTaskId,
-          file: videoForm.value.uploadFile,
-        })
-        persistVideos()
+        console.error('Upload failed:', err)
+        alert('Failed to upload video. Please try again.')
       }
     } else {
       if (editingVideo.value) {
-        const idx = videos.value.findIndex(v => v.id === editingVideo.value.id)
-        if (idx >= 0) {
-          videos.value[idx] = { 
-            ...videos.value[idx], 
+        try {
+          await api.put(`/onboarding/training-videos/${editingVideo.value.id}`, {
             title: videoForm.value.title,
             description: videoForm.value.description,
             url: videoForm.value.url,
             duration: videoForm.value.duration,
             is_required: videoForm.value.is_required,
             completion_threshold: videoForm.value.completion_threshold,
+          })
+          const idx = videos.value.findIndex(v => v.id === editingVideo.value.id)
+          if (idx >= 0) {
+            videos.value[idx] = { 
+              ...videos.value[idx], 
+              title: videoForm.value.title,
+              description: videoForm.value.description,
+              url: videoForm.value.url,
+              duration: videoForm.value.duration,
+              is_required: videoForm.value.is_required,
+              completion_threshold: videoForm.value.completion_threshold,
+            }
           }
-          persistVideos()
+        } catch (err) {
+          console.error('Failed to update video:', err)
+          alert('Failed to update video')
         }
       } else {
-        videos.value.push({
-          id: 'demo-' + Date.now(),
-          title: videoForm.value.title,
-          description: videoForm.value.description,
-          url: videoForm.value.url,
-          duration: videoForm.value.duration,
-          is_required: videoForm.value.is_required,
-          video_source: 'url',
-          completion_threshold: videoForm.value.completion_threshold,
-        })
-        persistVideos()
+        try {
+          const res = await api.post('/onboarding/training-videos', {
+            title: videoForm.value.title,
+            description: videoForm.value.description,
+            url: videoForm.value.url,
+            duration: videoForm.value.duration,
+            is_required: videoForm.value.is_required,
+            completion_threshold: videoForm.value.completion_threshold,
+            order: videoForm.value.order,
+          })
+          videos.value.push(res.data)
+        } catch (err) {
+          console.error('Failed to create video:', err)
+          alert('Failed to create video')
+        }
       }
     }
     closeModal()

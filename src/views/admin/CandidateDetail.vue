@@ -177,65 +177,33 @@ const assignPacket = async () => {
 }
 
 const transitionState = async (newState) => {
-  const isDemo = authStore.accessToken?.startsWith('demo-')
-  if (isDemo) {
-    candidate.value.state = newState
-    if (newState === 'in_progress') {
-      candidate.value.onboarding = { 
-        ...candidate.value.onboarding, 
-        currentState: newState,
-        progressPercent: 0,
-        taskStatuses: [
-          { taskId: 't1', task: { name: 'Personal Information', type: 'personal_info', description: 'Complete your personal profile', isRequired: true, order: 1 }, status: 'draft' },
-          { taskId: 't2', task: { name: 'Government Forms', type: 'government_forms', description: 'W-4 and I-9 tax forms', isRequired: true, order: 2 }, status: 'draft' },
-          { taskId: 't3', task: { name: 'Document Upload', type: 'document_upload', description: 'Upload ID and certifications', isRequired: true, order: 3 }, status: 'draft' },
-          { taskId: 't4', task: { name: 'Policy Acknowledgement', type: 'policy_acknowledgment', description: 'Review and acknowledge company policies', isRequired: true, order: 4 }, status: 'draft' },
-          { taskId: 't5', task: { name: 'Training Acknowledgement', type: 'training_acknowledgment', description: 'Complete required training', isRequired: true, order: 5 }, status: 'draft' },
-          { taskId: 't6', task: { name: 'E-Signature', type: 'e_signature', description: 'Sign offer letter and NDA', isRequired: true, order: 6 }, status: 'draft' },
-          { taskId: 't7', task: { name: 'Role Confirmation', type: 'role_confirmation', description: 'Review and confirm your role', isRequired: true, order: 7 }, status: 'draft' },
-        ]
-      }
-    }
-    if (newState === 'pending_hr_review') {
-      candidate.value.onboarding = { 
-        ...candidate.value.onboarding, 
-        currentState: newState,
-        progressPercent: 100
-      }
-    }
-    if (newState === 'approved') {
-      candidate.value.onboarding = { 
-        ...candidate.value.onboarding, 
-        currentState: newState,
-        progressPercent: 100
-      }
-    }
-    if (newState === 'employee_active') {
-      candidate.value.onboarding = { progressPercent: 100, taskStatuses: [] }
-    }
-    return
-  }
   await api.post(`/onboarding/${candidate.value.onboarding?.id}/transition`, { targetState: newState })
   await candidatesStore.fetchCandidate(authStore.user.tenantId, route.params.id)
 }
 
 const openOnboardingPortal = () => {
-  window.open('/onboarding/demo-token-123', '_blank')
+  if (candidate.value?.onboarding?.token) {
+    window.open(`/onboarding/${candidate.value.onboarding.token}`, '_blank')
+  }
 }
 
 const copyOnboardingLink = async () => {
-  const link = `${window.location.origin}/onboarding/demo-token-123`
-  try {
-    await navigator.clipboard.writeText(link)
-    linkCopied.value = true
-    setTimeout(() => { linkCopied.value = false }, 2000)
-  } catch (err) {
-    console.error('Failed to copy:', err)
+  if (candidate.value?.onboarding?.token) {
+    const link = `${window.location.origin}/onboarding/${candidate.value.onboarding.token}`
+    try {
+      await navigator.clipboard.writeText(link)
+      linkCopied.value = true
+      setTimeout(() => { linkCopied.value = false }, 2000)
+    } catch (err) {
+      console.error('Failed to copy:', err)
+    }
   }
 }
 
 const openOnboardingPortalDirect = () => {
-  window.location.href = '/onboarding/demo-token-123'
+  if (candidate.value?.onboarding?.token) {
+    window.location.href = `/onboarding/${candidate.value.onboarding.token}`
+  }
 }
 
 onMounted(async () => {
