@@ -116,7 +116,7 @@ export const useAuthStore = defineStore('auth', {
   actions: {
     async login(email, password) {
       try {
-        const response = await api.post('/api/auth/login', { email, password });
+        const response = await api.post('/auth/login', { email, password });
         const data = response.data;
         
         if (data.success) {
@@ -177,7 +177,7 @@ export const useAuthStore = defineStore('auth', {
       if (!this.accessToken) return null;
 
       try {
-        const response = await api.get('/api/auth/me');
+        const response = await api.get('/auth/me');
         this.setUser(response.data);
         return this.user;
       } catch (error) {

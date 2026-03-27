@@ -17,6 +17,13 @@ const api = axios.create({
 
 api.interceptors.request.use(
   (config) => {
+    if (config.url && config.url.startsWith('/api')) {
+      const baseEndsWithApi = api.defaults.baseURL?.endsWith('/api') || api.defaults.baseURL?.endsWith('/api/')
+      if (baseEndsWithApi) {
+        config.url = config.url.replace(/^\/api/, '')
+      }
+    }
+    
     const token = localStorage.getItem('accessToken')
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
