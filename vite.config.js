@@ -4,9 +4,16 @@ import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig({
   plugins: [vue(), tailwindcss()],
-  base: process.env.VERCEL === '1' ? '/' : '/',
+  base: '/',
   server: {
     port: 5173,
-    host: true
-  }
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'http://localhost:3000',
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
 })
