@@ -48,6 +48,23 @@
           <h2>Welcome back</h2>
           <p class="form-subtitle">Sign in to your account</p>
           
+          <div v-if="showDemoCredentials" class="demo-section">
+            <div class="demo-header">
+              <span class="demo-badge">Demo Accounts Available</span>
+              <button @click="loadDemoCredentials" class="btn-refresh" title="Refresh demo credentials">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+              </button>
+            </div>
+            <div class="demo-accounts">
+              <div v-for="account in demoAccounts" :key="account.role" class="demo-account" @click="fillDemoCredentials(account)">
+                <span class="demo-role">{{ account.role.toUpperCase() }}</span>
+                <span class="demo-email">{{ account.email }}</span>
+              </div>
+            </div>
+          </div>
+          
           <form @submit.prevent="handleLogin" class="login-form">
             <div class="form-group">
               <label for="email">Email</label>
@@ -103,6 +120,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '../../stores/auth'
+import api from '../../api/axios'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -111,6 +129,32 @@ const email = ref('')
 const password = ref('')
 const loading = ref(false)
 const error = ref('')
+const showDemoCredentials = ref(false)
+const demoAccounts = ref([])
+
+const loadDemoCredentials = async () => {
+  try {
+    const response = await api.get('/auth/demo')
+    if (response.data && response.data.accounts) {
+      demoAccounts.value = response.data.accounts
+      showDemoCredentials.value = true
+    }
+  } catch (err) {
+    demoAccounts.value = [
+      { role: 'admin', email: import.meta.env.VITE_DEMO_EMAIL || 'demo@timegrid.app' },
+      { role: 'hr', email: import.meta.env.VITE_DEMO_HR_EMAIL || 'hr@timegrid.app' },
+    ]
+    showDemoCredentials.value = true
+  }
+}
+
+const fillDemoCredentials = (account) => {
+  email.value = account.email
+  password.value = import.meta.env.VITE_DEMO_PASSWORD || 'demo123'
+  if (account.role === 'hr') {
+    password.value = import.meta.env.VITE_DEMO_HR_PASSWORD || 'hr123'
+  }
+}
 
 const handleLogin = async () => {
   loading.value = true
@@ -144,6 +188,10 @@ const getDashboardRoute = (role) => {
   }
   return routes[role] || '/admin'
 }
+
+onMounted(() => {
+  loadDemoCredentials()
+})
 </script>
 
 <style scoped>
@@ -371,5 +419,87 @@ const getDashboardRoute = (role) => {
 
 .register-link a:hover {
   text-decoration: underline;
+}
+
+.demo-section {
+  background: rgba(66, 184, 131, 0.1);
+  border: 1px solid rgba(66, 184, 131, 0.3);
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.demo-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.demo-badge {
+  background: #42b883;
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.btn-refresh {
+  background: transparent;
+  border: none;
+  color: #42b883;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-refresh:hover {
+  background: rgba(66, 184, 131, 0.2);
+}
+
+.btn-refresh svg {
+  width: 1rem;
+  height: 1rem;
+}
+
+.demo-accounts {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.demo-account {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #0f172a;
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.demo-account:hover {
+  background: #1e293b;
+  transform: translateX(4px);
+}
+
+.demo-role {
+  background: rgba(66, 184, 131, 0.2);
+  color: #42b883;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.demo-email {
+  color: #94a3b8;
+  font-size: 0.75rem;
 }
 </style>
