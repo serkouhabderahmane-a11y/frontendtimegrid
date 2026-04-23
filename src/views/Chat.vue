@@ -401,7 +401,7 @@ onMounted(async () => {
   width: 36px;
   height: 36px;
   border-radius: 0.5rem;
-  background: #42b883;
+  background: #006e5b;
   border: none;
   color: white;
   cursor: pointer;
@@ -412,7 +412,7 @@ onMounted(async () => {
 }
 
 .new-chat-btn:hover {
-  background: #359268;
+  background: #005a4a;
   transform: scale(1.05);
 }
 
@@ -434,7 +434,7 @@ onMounted(async () => {
 }
 
 .search-box:focus-within {
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .search-box svg {
@@ -475,12 +475,12 @@ onMounted(async () => {
 }
 
 .conversation-item:hover {
-  background: rgba(66, 184, 131, 0.05);
+  background: rgba(0, 110, 91, 0.05);
 }
 
 .conversation-item.active {
-  background: rgba(66, 184, 131, 0.1);
-  border-left-color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  border-left-color: #006e5b;
 }
 
 .conv-avatar {
@@ -543,7 +543,7 @@ onMounted(async () => {
 .start-chat-btn {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -553,14 +553,14 @@ onMounted(async () => {
 }
 
 .start-chat-btn:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .spinner {
   width: 32px;
   height: 32px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   margin: 0 auto;
   animation: spin 1s linear infinite;
@@ -589,7 +589,7 @@ onMounted(async () => {
 .no-chat-icon {
   width: 80px;
   height: 80px;
-  background: rgba(66, 184, 131, 0.1);
+  background: rgba(0, 110, 91, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -606,7 +606,7 @@ onMounted(async () => {
 .no-chat-icon svg {
   width: 40px;
   height: 40px;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .no-chat-selected h3 {
@@ -620,7 +620,7 @@ onMounted(async () => {
   align-items: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -630,7 +630,7 @@ onMounted(async () => {
 }
 
 .start-chat-btn-large:hover {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-2px);
 }
 
@@ -688,7 +688,7 @@ onMounted(async () => {
 .status-dot {
   width: 8px;
   height: 8px;
-  background: #42b883;
+  background: #006e5b;
   border-radius: 50%;
 }
 
@@ -768,7 +768,7 @@ onMounted(async () => {
 }
 
 .message.sent .message-bubble {
-  background: #42b883;
+  background: #006e5b;
   border-bottom-right-radius: 0.25rem;
 }
 
@@ -820,7 +820,7 @@ onMounted(async () => {
 
 .message-input input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .message-input input:disabled {
@@ -832,7 +832,7 @@ onMounted(async () => {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  background: #42b883;
+  background: #006e5b;
   border: none;
   color: white;
   cursor: pointer;
@@ -844,7 +844,7 @@ onMounted(async () => {
 }
 
 .send-btn:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
   transform: scale(1.05);
 }
 
@@ -955,7 +955,7 @@ onMounted(async () => {
 
 .search-users-box input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .users-list {
@@ -1024,7 +1024,7 @@ onMounted(async () => {
 .user-role-badge.admin { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 .user-role-badge.hr { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
 .user-role-badge.manager { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
-.user-role-badge.employee { background: rgba(66, 184, 131, 0.2); color: #86efac; }
+.user-role-badge.employee { background: rgba(0, 110, 91, 0.2); color: #86efac; }
 
 .no-users svg {
   width: 32px;

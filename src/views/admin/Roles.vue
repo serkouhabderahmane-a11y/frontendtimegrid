@@ -121,12 +121,12 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-outline {
@@ -154,7 +154,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -237,7 +237,7 @@ onMounted(() => {
 }
 
 .permission-more {
-  color: #42b883;
+  color: #006e5b;
   font-size: 0.75rem;
 }
 

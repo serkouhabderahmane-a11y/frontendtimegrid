@@ -250,8 +250,8 @@ onUnmounted(() => {
 }
 
 .clock-status.active {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
 }
 
 .clock-status.inactive {
@@ -277,8 +277,8 @@ onUnmounted(() => {
 }
 
 .clock-card.clocked-in {
-  border-color: #42b883;
-  background: linear-gradient(180deg, rgba(66, 184, 131, 0.05) 0%, #1e293b 100%);
+  border-color: #006e5b;
+  background: linear-gradient(180deg, rgba(0, 110, 91, 0.05) 0%, #1e293b 100%);
 }
 
 .clock-time {
@@ -309,12 +309,12 @@ onUnmounted(() => {
 }
 
 .clock-btn.clock-in {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .clock-btn.clock-in:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .clock-btn.clock-out {
@@ -377,7 +377,7 @@ onUnmounted(() => {
 }
 
 .action-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.action-icon.green { background: rgba(66, 184, 131, 0.1); color: #42b883; }
+.action-icon.green { background: rgba(0, 110, 91, 0.1); color: #006e5b; }
 .action-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 
 .action-label {

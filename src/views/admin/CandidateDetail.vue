@@ -223,7 +223,7 @@ onMounted(async () => {
 }
 
 .page-header a {
-  color: #42b883;
+  color: #006e5b;
   text-decoration: none;
 }
 
@@ -271,11 +271,11 @@ onMounted(async () => {
 }
 
 .workflow-step.active .step-number {
-  background: #42b883;
+  background: #006e5b;
 }
 
 .workflow-step.completed .step-number {
-  background: #42b883;
+  background: #006e5b;
 }
 
 .step-content {
@@ -309,7 +309,7 @@ onMounted(async () => {
 
 .progress-fill {
   height: 100%;
-  background: #42b883;
+  background: #006e5b;
   border-radius: 4px;
   transition: width 0.3s;
 }
@@ -341,7 +341,7 @@ onMounted(async () => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;

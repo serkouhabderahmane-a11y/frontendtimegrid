@@ -416,7 +416,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #42b883, #3498db);
+  background: linear-gradient(135deg, #006e5b, #3498db);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -438,7 +438,7 @@ onMounted(() => {
 }
 
 .create-post-btn:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
   color: #94a3b8;
 }
 
@@ -457,7 +457,7 @@ onMounted(() => {
 }
 
 .post-card.pinned {
-  border-color: #42b883;
+  border-color: #006e5b;
   background: linear-gradient(135deg, #1e293b 0%, #1a2f25 100%);
 }
 
@@ -465,7 +465,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.375rem;
-  color: #42b883;
+  color: #006e5b;
   font-size: 0.75rem;
   font-weight: 600;
   margin-bottom: 0.75rem;
@@ -530,7 +530,7 @@ onMounted(() => {
 .role-badge.admin { background: rgba(239, 68, 68, 0.2); color: #fca5a5; }
 .role-badge.hr { background: rgba(59, 130, 246, 0.2); color: #93c5fd; }
 .role-badge.manager { background: rgba(168, 85, 247, 0.2); color: #d8b4fe; }
-.role-badge.employee { background: rgba(66, 184, 131, 0.2); color: #86efac; }
+.role-badge.employee { background: rgba(0, 110, 91, 0.2); color: #86efac; }
 
 .post-meta span:last-child {
   color: #64748b;
@@ -772,7 +772,7 @@ onMounted(() => {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #42b883, #3498db);
+  background: linear-gradient(135deg, #006e5b, #3498db);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -799,14 +799,14 @@ onMounted(() => {
 
 .add-comment input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .send-comment-btn {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #42b883;
+  background: #006e5b;
   border: none;
   color: white;
   cursor: pointer;
@@ -817,7 +817,7 @@ onMounted(() => {
 }
 
 .send-comment-btn:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
   transform: scale(1.05);
 }
 
@@ -844,7 +844,7 @@ onMounted(() => {
   width: 64px;
   height: 64px;
   margin: 0 auto 1rem;
-  background: rgba(66, 184, 131, 0.1);
+  background: rgba(0, 110, 91, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -854,7 +854,7 @@ onMounted(() => {
 .empty-icon svg {
   width: 32px;
   height: 32px;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .empty-state h3 {
@@ -875,7 +875,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
@@ -966,7 +966,7 @@ onMounted(() => {
 
 .modal-body textarea:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .modal-footer {
@@ -990,13 +990,13 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-1px);
 }
 

@@ -117,7 +117,7 @@ input {
 button {
   width: 100%;
   padding: 0.75rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   border-radius: 4px;

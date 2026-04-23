@@ -224,12 +224,12 @@ const formatDateTime = (date) => date ? new Date(date).toLocaleString() : '-'
 .status-badge.submitted { background: #854d0e; color: #fef3c7; }
 .status-badge.locked { background: #166534; color: #dcfce7; }
 .actions { display: flex; gap: 0.5rem; }
-.btn-primary { background: #42b883; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
-.btn-primary:hover { background: #359268; }
+.btn-primary { background: #006e5b; color: white; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+.btn-primary:hover { background: #005a4a; }
 .btn-primary:disabled { background: #64748b; cursor: not-allowed; }
 .btn-secondary { background: #334155; color: #e2e8f0; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
 .btn-info { background: #3b82f6; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; }
-.btn-success { background: #42b883; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; }
+.btn-success { background: #006e5b; color: white; border: none; padding: 0.25rem 0.75rem; border-radius: 4px; cursor: pointer; }
 .btn-sm { padding: 0.25rem 0.75rem; font-size: 0.875rem; background: #334155; color: #e2e8f0; border: none; border-radius: 4px; cursor: pointer; }
 .empty-state { text-align: center; padding: 2rem; color: #64748b; }
 .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 1000; }

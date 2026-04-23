@@ -265,7 +265,7 @@ onMounted(() => {
 .requests-table th { background: #0f172a; padding: 1rem; text-align: left; color: #94a3b8; font-weight: 600; font-size: 0.75rem; text-transform: uppercase; }
 .requests-table td { padding: 1rem; border-top: 1px solid #334155; color: #e2e8f0; }
 .employee-cell { display: flex; align-items: center; gap: 0.75rem; }
-.employee-avatar { width: 36px; height: 36px; border-radius: 50%; background: #42b883; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 600; }
+.employee-avatar { width: 36px; height: 36px; border-radius: 50%; background: #006e5b; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.75rem; font-weight: 600; }
 .employee-info { display: flex; flex-direction: column; }
 .employee-name { font-weight: 500; }
 .employee-dept { font-size: 0.75rem; color: #64748b; }
@@ -282,7 +282,7 @@ onMounted(() => {
 .btn-icon.danger:hover { color: #ef4444; }
 .no-actions { color: #64748b; }
 .loading-cell, .empty-cell { text-align: center; padding: 3rem; color: #64748b; }
-.spinner { width: 32px; height: 32px; border: 3px solid #334155; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+.spinner { width: 32px; height: 32px; border: 3px solid #334155; border-top-color: #006e5b; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; }
 .pagination button { background: #334155; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; color: #f8fafc; cursor: pointer; }

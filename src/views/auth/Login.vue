@@ -3,14 +3,14 @@
     <div class="login-bg"></div>
     
     <div class="login-container">
-      <div class="login-brand">
-        <div class="brand-content">
-          <div class="logo">
-            <div class="logo-icon">
-              <span>TG</span>
+        <div class="login-brand">
+          <div class="brand-content">
+            <div class="logo">
+              <div class="logo-container">
+                <img src="@/assets/image.png" alt="TimeGrid Logo" class="logo-img" />
+              </div>
+              <span>TimeGrid</span>
             </div>
-            <span>TimeGrid</span>
-          </div>
           <h1>Workforce Operations<br/>Simplified</h1>
           <p>Enterprise-grade employee onboarding and time tracking platform built for modern organizations.</p>
           
@@ -204,7 +204,7 @@ onMounted(() => {
   position: fixed;
   inset: 0;
   background: 
-    radial-gradient(ellipse at top left, rgba(66, 184, 131, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at top left, rgba(0, 110, 91, 0.1) 0%, transparent 50%),
     radial-gradient(ellipse at bottom right, rgba(59, 130, 246, 0.05) 0%, transparent 50%),
     #0f172a;
   z-index: -1;
@@ -240,23 +240,26 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  color: #42b883;
+  color: #006e5b;
   font-size: 1.5rem;
   font-weight: 700;
   margin-bottom: 2rem;
 }
 
-.logo-icon {
-  width: 48px;
-  height: 48px;
+.logo-container {
+  padding: 8px;
+  background: #1e293b;
   border-radius: 12px;
-  background: linear-gradient(135deg, #42b883, #359268);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 18px;
-  font-weight: 700;
-  color: white;
+}
+
+.logo-img {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .login-brand h1 {
@@ -291,7 +294,7 @@ onMounted(() => {
 .feature-item svg {
   width: 1.25rem;
   height: 1.25rem;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .login-form-container {
@@ -360,8 +363,8 @@ onMounted(() => {
 
 .input-wrapper input:focus {
   outline: none;
-  border-color: #42b883;
-  box-shadow: 0 0 0 3px rgba(66, 184, 131, 0.1);
+  border-color: #006e5b;
+  box-shadow: 0 0 0 3px rgba(0, 110, 91, 0.1);
 }
 
 .input-wrapper input::placeholder {
@@ -386,7 +389,7 @@ onMounted(() => {
 .btn-submit {
   width: 100%;
   padding: 0.875rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -396,7 +399,7 @@ onMounted(() => {
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-1px);
 }
 
@@ -413,7 +416,7 @@ onMounted(() => {
 }
 
 .register-link a {
-  color: #42b883;
+  color: #006e5b;
   text-decoration: none;
 }
 
@@ -422,8 +425,8 @@ onMounted(() => {
 }
 
 .demo-section {
-  background: rgba(66, 184, 131, 0.1);
-  border: 1px solid rgba(66, 184, 131, 0.3);
+  background: rgba(0, 110, 91, 0.1);
+  border: 1px solid rgba(0, 110, 91, 0.3);
   border-radius: 0.75rem;
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -437,7 +440,7 @@ onMounted(() => {
 }
 
 .demo-badge {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
@@ -448,7 +451,7 @@ onMounted(() => {
 .btn-refresh {
   background: transparent;
   border: none;
-  color: #42b883;
+  color: #006e5b;
   cursor: pointer;
   padding: 0.25rem;
   border-radius: 0.25rem;
@@ -458,7 +461,7 @@ onMounted(() => {
 }
 
 .btn-refresh:hover {
-  background: rgba(66, 184, 131, 0.2);
+  background: rgba(0, 110, 91, 0.2);
 }
 
 .btn-refresh svg {
@@ -489,8 +492,8 @@ onMounted(() => {
 }
 
 .demo-role {
-  background: rgba(66, 184, 131, 0.2);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.2);
+  color: #006e5b;
   padding: 0.125rem 0.5rem;
   border-radius: 0.25rem;
   font-size: 0.625rem;

@@ -329,7 +329,7 @@ onUnmounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -380,13 +380,13 @@ onUnmounted(() => {
 }
 
 .btn-clock-in {
-  background: linear-gradient(135deg, #42b883, #359268);
+  background: linear-gradient(135deg, #006e5b, #005a4a);
   color: white;
 }
 
 .btn-clock-in:hover:not(:disabled) {
   transform: scale(1.05);
-  box-shadow: 0 8px 25px rgba(66, 184, 131, 0.4);
+  box-shadow: 0 8px 25px rgba(0, 110, 91, 0.4);
 }
 
 .btn-clock-out {

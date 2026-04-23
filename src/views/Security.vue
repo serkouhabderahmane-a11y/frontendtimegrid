@@ -134,7 +134,7 @@ const toggleTwoFactor = () => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .btn {
@@ -152,12 +152,12 @@ const toggleTwoFactor = () => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-outline {
@@ -188,8 +188,8 @@ const toggleTwoFactor = () => {
 }
 
 .status-badge.active {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
 }
 
 .session-item {
@@ -206,8 +206,8 @@ const toggleTwoFactor = () => {
   width: 40px;
   height: 40px;
   border-radius: 0.5rem;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -236,8 +236,8 @@ const toggleTwoFactor = () => {
 }
 
 .current-badge {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   padding: 0.25rem 0.75rem;
   border-radius: 9999px;
   font-size: 0.75rem;

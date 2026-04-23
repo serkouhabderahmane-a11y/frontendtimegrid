@@ -207,7 +207,7 @@ onMounted(async () => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -229,12 +229,12 @@ onMounted(async () => {
   width: 64px;
   height: 64px;
   margin: 0 auto 1rem;
-  background: rgba(66, 184, 131, 0.1);
+  background: rgba(0, 110, 91, 0.1);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .empty-icon svg {
@@ -266,7 +266,7 @@ onMounted(async () => {
 }
 
 .approval-card:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
   transform: translateY(-2px);
 }
 
@@ -286,12 +286,12 @@ onMounted(async () => {
 .task-icon {
   width: 3rem;
   height: 3rem;
-  background: rgba(66, 184, 131, 0.1);
+  background: rgba(0, 110, 91, 0.1);
   border-radius: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .task-icon svg {
@@ -351,13 +351,13 @@ onMounted(async () => {
 }
 
 .btn-approve {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
 }
 
 .btn-approve:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-reject {
@@ -451,7 +451,7 @@ onMounted(async () => {
 
 .modal-body textarea:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .modal-footer {

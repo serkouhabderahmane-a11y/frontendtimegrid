@@ -519,7 +519,7 @@ const formatFileSize = (bytes) => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -655,8 +655,8 @@ const formatFileSize = (bytes) => {
 }
 
 .meta-badge.required {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
 }
 
 .meta-badge.optional {
@@ -678,7 +678,7 @@ const formatFileSize = (bytes) => {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 0.5rem 1rem;
@@ -689,7 +689,7 @@ const formatFileSize = (bytes) => {
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-secondary {
@@ -753,7 +753,7 @@ const formatFileSize = (bytes) => {
 .form-group input:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .form-hint {
@@ -778,7 +778,7 @@ const formatFileSize = (bytes) => {
 .checkbox-label input[type="checkbox"] {
   width: 1.125rem;
   height: 1.125rem;
-  accent-color: #42b883;
+  accent-color: #006e5b;
 }
 
 .checkbox-label span {
@@ -794,13 +794,13 @@ const formatFileSize = (bytes) => {
 
 .range-input input[type="range"] {
   flex: 1;
-  accent-color: #42b883;
+  accent-color: #006e5b;
 }
 
 .range-value {
   font-size: 0.875rem;
   font-weight: 600;
-  color: #42b883;
+  color: #006e5b;
   min-width: 3rem;
 }
 
@@ -878,13 +878,13 @@ const formatFileSize = (bytes) => {
 }
 
 .source-tab:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
   color: #e2e8f0;
 }
 
 .source-tab.active {
-  background: #42b883;
-  border-color: #42b883;
+  background: #006e5b;
+  border-color: #006e5b;
   color: white;
 }
 
@@ -900,8 +900,8 @@ const formatFileSize = (bytes) => {
 }
 
 .file-upload-area:hover {
-  border-color: #42b883;
-  background: rgba(66, 184, 131, 0.05);
+  border-color: #006e5b;
+  background: rgba(0, 110, 91, 0.05);
 }
 
 .file-upload-area svg {
@@ -937,7 +937,7 @@ const formatFileSize = (bytes) => {
 }
 
 .file-info svg {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .file-name {
@@ -979,7 +979,7 @@ const formatFileSize = (bytes) => {
 
 .upload-progress .progress-fill {
   height: 100%;
-  background: #42b883;
+  background: #006e5b;
   transition: width 0.3s;
 }
 

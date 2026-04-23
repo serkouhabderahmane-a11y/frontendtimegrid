@@ -257,7 +257,7 @@ onMounted(() => {
 .request-status.canceled { background: #334155; color: #94a3b8; }
 .request-dates { display: flex; justify-content: space-between; margin-bottom: 0.5rem; }
 .date-range { color: #f8fafc; }
-.days-count { color: #42b883; font-weight: 600; }
+.days-count { color: #006e5b; font-weight: 600; }
 .request-reason { color: #94a3b8; font-size: 0.875rem; margin-bottom: 0.75rem; padding: 0.5rem; background: #0f172a; border-radius: 0.25rem; }
 .request-meta { font-size: 0.75rem; color: #64748b; display: flex; gap: 1rem; margin-bottom: 0.5rem; }
 .request-comment { font-size: 0.875rem; color: #94a3b8; padding: 0.5rem; background: #0f172a; border-radius: 0.25rem; margin-bottom: 0.75rem; }
@@ -278,8 +278,8 @@ onMounted(() => {
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem; border-top: 1px solid #334155; }
 .btn { padding: 0.625rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; }
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
-.btn-primary { background: #42b883; color: white; }
-.btn-primary:hover { background: #359268; }
+.btn-primary { background: #006e5b; color: white; }
+.btn-primary:hover { background: #005a4a; }
 .btn-secondary { background: #334155; color: #f8fafc; }
 .btn-secondary:hover { background: #475569; }
 .btn-danger { background: rgba(239,68,68,0.2); color: #ef4444; }

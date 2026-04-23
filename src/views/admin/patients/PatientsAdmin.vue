@@ -433,9 +433,9 @@ onMounted(() => {
 .search-section select { background: #1e293b; border: 1px solid #334155; border-radius: 0.5rem; padding: 0.75rem 1rem; color: #f8fafc; min-width: 150px; }
 .patients-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1rem; }
 .patient-card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.25rem; cursor: pointer; transition: all 0.2s; }
-.patient-card:hover { border-color: #42b883; transform: translateY(-2px); }
+.patient-card:hover { border-color: #006e5b; transform: translateY(-2px); }
 .patient-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
-.patient-avatar { width: 48px; height: 48px; border-radius: 50%; background: #42b883; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
+.patient-avatar { width: 48px; height: 48px; border-radius: 50%; background: #006e5b; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; }
 .patient-info { flex: 1; }
 .patient-info h3 { color: #f8fafc; font-size: 1rem; margin-bottom: 0.125rem; }
 .patient-id { font-size: 0.75rem; color: #64748b; }
@@ -449,7 +449,7 @@ onMounted(() => {
 .staff-badge { width: 24px; height: 24px; border-radius: 50%; background: #334155; display: flex; align-items: center; justify-content: center; color: #94a3b8; font-size: 0.625rem; }
 .loading-state, .empty-state { text-align: center; padding: 4rem; color: #64748b; }
 .empty-state h3 { color: #f8fafc; margin: 1rem 0 0.5rem; }
-.spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+.spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #006e5b; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; }
 .pagination button { background: #334155; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; color: #f8fafc; cursor: pointer; }
@@ -470,8 +470,8 @@ onMounted(() => {
 .form-section-title { color: #f8fafc; font-size: 1rem; font-weight: 600; margin: 1.5rem 0 1rem; padding-top: 1rem; border-top: 1px solid #334155; }
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem; border-top: 1px solid #334155; }
 .btn { padding: 0.625rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; }
-.btn-primary { background: #42b883; color: white; }
-.btn-primary:hover { background: #359268; }
+.btn-primary { background: #006e5b; color: white; }
+.btn-primary:hover { background: #005a4a; }
 .btn-secondary { background: #334155; color: #f8fafc; }
 .btn-secondary:hover { background: #475569; }
 .patient-detail-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; }
@@ -484,9 +484,9 @@ onMounted(() => {
 .allergies-text { color: #f8fafc; font-size: 0.875rem; background: rgba(239,68,68,0.1); padding: 0.5rem; border-radius: 0.25rem; }
 .tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; border-bottom: 1px solid #334155; }
 .tabs button { background: none; border: none; color: #64748b; padding: 0.75rem 1rem; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; }
-.tabs button.active { color: #42b883; border-bottom-color: #42b883; }
+.tabs button.active { color: #006e5b; border-bottom-color: #006e5b; }
 .tab-content { min-height: 300px; }
-.timeline-item { background: #0f172a; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; border-left: 3px solid #42b883; }
+.timeline-item { background: #0f172a; border-radius: 0.5rem; padding: 1rem; margin-bottom: 0.75rem; border-left: 3px solid #006e5b; }
 .timeline-item.medical_report { border-left-color: #3b82f6; }
 .timeline-item.medicine { border-left-color: #22c55e; }
 .timeline-item.appointment { border-left-color: #f59e0b; }

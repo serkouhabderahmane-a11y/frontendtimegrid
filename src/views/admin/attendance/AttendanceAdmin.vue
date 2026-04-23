@@ -660,7 +660,7 @@ onMounted(() => {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #42b883;
+  background: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -744,7 +744,7 @@ onMounted(() => {
   width: 32px;
   height: 32px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -881,12 +881,12 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-primary:disabled {

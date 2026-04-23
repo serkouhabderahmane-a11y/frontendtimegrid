@@ -321,7 +321,7 @@ onUnmounted(() => {
 }
 
 .entry-status.active {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .status-dot {
@@ -362,7 +362,7 @@ onUnmounted(() => {
 }
 
 .detail-value.duration {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .clock-actions {
@@ -395,12 +395,12 @@ onUnmounted(() => {
 }
 
 .clock-in {
-  background: linear-gradient(135deg, #42b883, #359268);
+  background: linear-gradient(135deg, #006e5b, #005a4a);
   color: white;
 }
 
 .clock-in:hover:not(:disabled) {
-  background: linear-gradient(135deg, #359268, #2d7a5a);
+  background: linear-gradient(135deg, #005a4a, #2d7a5a);
 }
 
 .clock-out {
@@ -423,7 +423,7 @@ onUnmounted(() => {
   justify-content: center;
   gap: 0.5rem;
   margin-top: 1.5rem;
-  color: #42b883;
+  color: #006e5b;
   font-weight: 500;
 }
 
@@ -489,7 +489,7 @@ onUnmounted(() => {
 }
 
 .entry-duration {
-  color: #42b883;
+  color: #006e5b;
   font-weight: 600;
   font-size: 0.875rem;
 }

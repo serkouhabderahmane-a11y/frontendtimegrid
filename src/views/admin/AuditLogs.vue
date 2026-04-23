@@ -231,7 +231,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -281,7 +281,7 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.action-badge.create { background: rgba(66, 184, 131, 0.1); color: #42b883; }
+.action-badge.create { background: rgba(0, 110, 91, 0.1); color: #006e5b; }
 .action-badge.update { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
 .action-badge.delete { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
 .action-badge.login, .action-badge.logout { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }

@@ -166,7 +166,7 @@
 
 .setting-select:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .toggle {
@@ -207,7 +207,7 @@
 }
 
 input:checked + .slider {
-  background-color: #42b883;
+  background-color: #006e5b;
 }
 
 input:checked + .slider:before {
@@ -233,11 +233,11 @@ input:checked + .slider:before {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 </style>

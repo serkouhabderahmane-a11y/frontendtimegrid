@@ -205,7 +205,7 @@ onUnmounted(() => {
 
 .date-input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .date-picker-dropdown {
@@ -243,7 +243,7 @@ onUnmounted(() => {
 }
 
 .nav-btn:hover {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .picker-weekdays {
@@ -285,12 +285,12 @@ onUnmounted(() => {
 }
 
 .day-btn.selected {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .day-btn.today {
-  border: 1px solid #42b883;
+  border: 1px solid #006e5b;
 }
 
 .picker-footer {
@@ -311,7 +311,7 @@ onUnmounted(() => {
 }
 
 .today-btn {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .clear-btn {

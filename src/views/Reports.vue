@@ -121,7 +121,7 @@ const generateReport = async (type) => {
 }
 
 .card:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
   transform: translateY(-2px);
 }
 
@@ -135,8 +135,8 @@ const generateReport = async (type) => {
   width: 60px;
   height: 60px;
   border-radius: 1rem;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -177,7 +177,7 @@ const generateReport = async (type) => {
   width: 50px;
   height: 50px;
   border: 4px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;

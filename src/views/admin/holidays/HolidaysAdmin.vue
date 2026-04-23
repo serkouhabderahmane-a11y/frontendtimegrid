@@ -369,7 +369,7 @@ onMounted(() => {
 .holiday-card { background: #1e293b; border: 1px solid #334155; border-radius: 0.75rem; padding: 1.25rem; }
 .holiday-card.inactive { opacity: 0.6; }
 .holiday-header { display: flex; gap: 1rem; align-items: flex-start; }
-.holiday-date { width: 60px; height: 60px; background: linear-gradient(135deg, #42b883, #359268); border-radius: 0.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
+.holiday-date { width: 60px; height: 60px; background: linear-gradient(135deg, #006e5b, #005a4a); border-radius: 0.75rem; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; flex-shrink: 0; }
 .holiday-date .day { font-size: 1.5rem; font-weight: 700; line-height: 1; }
 .holiday-date .month { font-size: 0.75rem; text-transform: uppercase; }
 .holiday-info { flex: 1; }
@@ -381,7 +381,7 @@ onMounted(() => {
 .type-badge.regional { background: rgba(249,115,22,0.2); color: #f97316; }
 .type-badge.optional { background: rgba(34,197,94,0.2); color: #22c55e; }
 .date-range, .single-date { color: #94a3b8; font-size: 0.875rem; }
-.recurring { font-size: 0.75rem; color: #42b883; background: rgba(66,184,131,0.1); padding: 0.125rem 0.5rem; border-radius: 0.25rem; }
+.recurring { font-size: 0.75rem; color: #006e5b; background: rgba(66,184,131,0.1); padding: 0.125rem 0.5rem; border-radius: 0.25rem; }
 .holiday-status { flex-shrink: 0; }
 .status-dot { width: 12px; height: 12px; border-radius: 50%; background: #ef4444; }
 .status-dot.active { background: #22c55e; }
@@ -392,7 +392,7 @@ onMounted(() => {
 .holiday-actions { display: flex; gap: 0.5rem; padding-left: 4.5rem; }
 .loading-state, .empty-state { text-align: center; padding: 4rem; color: #64748b; }
 .empty-state h3 { color: #f8fafc; margin: 1rem 0 0.5rem; }
-.spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #42b883; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
+.spinner { width: 40px; height: 40px; border: 3px solid #334155; border-top-color: #006e5b; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 1rem; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .pagination { display: flex; justify-content: center; align-items: center; gap: 1rem; margin-top: 1.5rem; }
 .pagination button { background: #334155; border: none; border-radius: 0.5rem; padding: 0.5rem 1rem; color: #f8fafc; cursor: pointer; }
@@ -415,8 +415,8 @@ onMounted(() => {
 .modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.25rem; border-top: 1px solid #334155; }
 .btn { padding: 0.625rem 1rem; border-radius: 0.5rem; font-weight: 600; font-size: 0.875rem; cursor: pointer; transition: all 0.2s; border: none; display: inline-flex; align-items: center; gap: 0.375rem; }
 .btn-sm { padding: 0.375rem 0.75rem; font-size: 0.75rem; }
-.btn-primary { background: #42b883; color: white; }
-.btn-primary:hover { background: #359268; }
+.btn-primary { background: #006e5b; color: white; }
+.btn-primary:hover { background: #005a4a; }
 .btn-secondary { background: #334155; color: #f8fafc; }
 .btn-secondary:hover { background: #475569; }
 .btn-success { background: rgba(34,197,94,0.2); color: #22c55e; }

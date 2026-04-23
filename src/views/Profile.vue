@@ -119,7 +119,7 @@ const formatRole = (role) => {
   width: 120px;
   height: 120px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #42b883, #359268);
+  background: linear-gradient(135deg, #006e5b, #005a4a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,12 +143,12 @@ const formatRole = (role) => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-outline {
@@ -163,7 +163,7 @@ const formatRole = (role) => {
 }
 
 .role {
-  color: #42b883;
+  color: #006e5b;
   font-weight: 600;
   margin-bottom: 0.25rem;
 }
@@ -206,7 +206,7 @@ const formatRole = (role) => {
 
 .form-group input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 @media (max-width: 768px) {

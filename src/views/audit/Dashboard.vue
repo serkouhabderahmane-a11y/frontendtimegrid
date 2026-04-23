@@ -131,7 +131,7 @@ onMounted(() => {
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -159,7 +159,7 @@ onMounted(() => {
 .stat-value {
   font-size: 2rem;
   font-weight: 700;
-  color: #42b883;
+  color: #006e5b;
   margin-bottom: 0.25rem;
 }
 
@@ -205,7 +205,7 @@ onMounted(() => {
 }
 
 .activity-count {
-  color: #42b883;
+  color: #006e5b;
   font-weight: 600;
 }
 

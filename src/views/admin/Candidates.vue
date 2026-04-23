@@ -287,7 +287,7 @@ onMounted(() => fetchCandidates())
   align-items: center;
   gap: 0.5rem;
   padding: 0.625rem 1rem;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   border-radius: 0.5rem;
@@ -297,7 +297,7 @@ onMounted(() => fetchCandidates())
 }
 
 .add-btn:hover {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-2px);
 }
 
@@ -334,7 +334,7 @@ onMounted(() => fetchCandidates())
 
 .search-input input:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .filter-select {
@@ -360,7 +360,7 @@ onMounted(() => fetchCandidates())
   width: 40px;
   height: 40px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -405,7 +405,7 @@ td {
 }
 
 .table-row:hover {
-  background: rgba(66, 184, 131, 0.05);
+  background: rgba(0, 110, 91, 0.05);
 }
 
 .name-cell {
@@ -419,7 +419,7 @@ td {
   width: 2rem;
   height: 2rem;
   border-radius: 9999px;
-  background: linear-gradient(135deg, #42b883, #359268);
+  background: linear-gradient(135deg, #006e5b, #005a4a);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -441,10 +441,10 @@ td {
 .status-badge.in_progress { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 .status-badge.pending_hr_review { background: rgba(234, 179, 8, 0.1); color: #eab308; }
 .status-badge.approved { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
-.status-badge.employee_active { background: rgba(66, 184, 131, 0.1); color: #42b883; }
+.status-badge.employee_active { background: rgba(0, 110, 91, 0.1); color: #006e5b; }
 
 .view-link {
-  color: #42b883;
+  color: #006e5b;
   text-decoration: none;
   font-weight: 500;
 }
@@ -538,7 +538,7 @@ td {
 .form-group input:focus,
 .form-group select:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .modal-actions {
@@ -566,7 +566,7 @@ td {
 
 .btn-submit {
   padding: 0.625rem 1rem;
-  background: #42b883;
+  background: #006e5b;
   border: none;
   color: white;
   border-radius: 0.5rem;
@@ -575,7 +575,7 @@ td {
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-submit:disabled {

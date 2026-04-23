@@ -156,7 +156,7 @@ onMounted(async () => {
 
 .progress-fill {
   height: 100%;
-  background: #42b883;
+  background: #006e5b;
   transition: width 0.3s ease;
 }
 
@@ -183,7 +183,7 @@ onMounted(async () => {
 .badge.in_progress { background: #f3e5f5; color: #7b1fa2; }
 .badge.pending_hr_review { background: #fff8e1; color: #ffa000; }
 .badge.approved { background: #e8f5e9; color: #388e3c; }
-.badge.employee_active { background: #42b883; color: white; }
+.badge.employee_active { background: #006e5b; color: white; }
 
 .tasks-list h2 {
   margin-bottom: 1rem;
@@ -198,7 +198,7 @@ onMounted(async () => {
 }
 
 .task-card.approved {
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .task-card.rejected {

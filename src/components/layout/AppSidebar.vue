@@ -4,7 +4,9 @@
     <aside class="sidebar" :class="{ collapsed: isCollapsed }">
       <div class="sidebar-header">
         <RouterLink to="/" class="brand">
-          <div class="brand-icon">TG</div>
+          <div class="brand-icon">
+            <img src="@/assets/image.png" alt="TimeGrid Logo" class="brand-logo-img" />
+          </div>
           <span v-if="!isCollapsed" class="brand-text">TimeGrid</span>
         </RouterLink>
         <button @click="toggleSidebar" class="collapse-btn" :title="isCollapsed ? 'Expand' : 'Collapse'">
@@ -533,23 +535,28 @@ const handleLogout = () => {
 }
 
 .brand-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #42b883, #359268);
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: #1e293b;
+  padding: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 14px;
-  font-weight: 700;
-  color: white;
   flex-shrink: 0;
+}
+
+.brand-logo-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .brand-text {
   font-size: 1.125rem;
   font-weight: 700;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .collapse-btn {
@@ -609,9 +616,9 @@ const handleLogout = () => {
 }
 
 .nav-item.active {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
-  border-left-color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
+  border-left-color: #006e5b;
 }
 
 .nav-icon {
@@ -646,7 +653,7 @@ const handleLogout = () => {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #42b883, #359268);
+  background: linear-gradient(135deg, #006e5b, #005a4a);
   display: flex;
   align-items: center;
   justify-content: center;

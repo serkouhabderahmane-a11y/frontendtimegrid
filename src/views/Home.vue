@@ -259,7 +259,7 @@ onMounted(() => {
   width: 48px;
   height: 48px;
   border: 3px solid #334155;
-  border-top-color: #42b883;
+  border-top-color: #006e5b;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-bottom: 1rem;
@@ -283,7 +283,7 @@ onMounted(() => {
   position: absolute;
   inset: 0;
   background: 
-    radial-gradient(ellipse at top, rgba(66, 184, 131, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at top, rgba(0, 110, 91, 0.15) 0%, transparent 50%),
     radial-gradient(ellipse at bottom right, rgba(59, 130, 246, 0.1) 0%, transparent 50%);
 }
 
@@ -297,8 +297,8 @@ onMounted(() => {
 
 .hero-badge {
   display: inline-block;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-size: 0.875rem;
@@ -315,7 +315,7 @@ onMounted(() => {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #42b883, #3b82f6);
+  background: linear-gradient(135deg, #006e5b, #3b82f6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -348,12 +348,12 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-2px);
 }
 
@@ -399,8 +399,8 @@ onMounted(() => {
   width: 3rem;
   height: 3rem;
   border-radius: 0.75rem;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -488,7 +488,7 @@ onMounted(() => {
 }
 
 .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.stat-icon.green { background: rgba(66, 184, 131, 0.1); color: #42b883; }
+.stat-icon.green { background: rgba(0, 110, 91, 0.1); color: #006e5b; }
 .stat-icon.orange { background: rgba(249, 115, 22, 0.1); color: #f97316; }
 .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 
@@ -519,8 +519,8 @@ onMounted(() => {
 }
 
 .stat-trend.up {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
 }
 
 .stat-trend.down {
@@ -556,7 +556,7 @@ onMounted(() => {
 }
 
 .action-card:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
   transform: translateY(-2px);
 }
 
@@ -564,8 +564,8 @@ onMounted(() => {
   width: 3rem;
   height: 3rem;
   border-radius: 0.75rem;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;

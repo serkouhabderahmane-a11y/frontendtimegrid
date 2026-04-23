@@ -81,7 +81,7 @@ const handleSubmit = () => {
 }
 
 button {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 0.75rem 1.5rem;

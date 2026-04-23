@@ -292,12 +292,12 @@ onMounted(() => {
 }
 
 .btn-primary {
-  background: #42b883;
+  background: #006e5b;
   color: white;
 }
 
 .btn-primary:hover {
-  background: #359268;
+  background: #005a4a;
 }
 
 .stats-grid {
@@ -336,7 +336,7 @@ onMounted(() => {
 }
 
 .stat-icon.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; }
-.stat-icon.green { background: rgba(66, 184, 131, 0.1); color: #42b883; }
+.stat-icon.green { background: rgba(0, 110, 91, 0.1); color: #006e5b; }
 .stat-icon.orange { background: rgba(249, 115, 22, 0.1); color: #f97316; }
 .stat-icon.purple { background: rgba(139, 92, 246, 0.1); color: #8b5cf6; }
 
@@ -348,8 +348,8 @@ onMounted(() => {
 }
 
 .stat-trend.up {
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
 }
 
 .stat-value {
@@ -391,7 +391,7 @@ onMounted(() => {
 }
 
 .view-all {
-  color: #42b883;
+  color: #006e5b;
   font-size: 0.875rem;
   text-decoration: none;
 }
@@ -432,7 +432,7 @@ onMounted(() => {
 .status-dot.in_progress { background: #8b5cf6; }
 .status-dot.pending_hr_review { background: #eab308; }
 .status-dot.approved { background: #22c55e; }
-.status-dot.employee_active { background: #42b883; }
+.status-dot.employee_active { background: #006e5b; }
 
 .status-label {
   color: #e2e8f0;
@@ -440,7 +440,7 @@ onMounted(() => {
 }
 
 .status-count {
-  color: #42b883;
+  color: #006e5b;
   font-weight: 600;
 }
 
@@ -470,8 +470,8 @@ onMounted(() => {
   width: 2.5rem;
   height: 2.5rem;
   border-radius: 0.5rem;
-  background: rgba(66, 184, 131, 0.1);
-  color: #42b883;
+  background: rgba(0, 110, 91, 0.1);
+  color: #006e5b;
   display: flex;
   align-items: center;
   justify-content: center;

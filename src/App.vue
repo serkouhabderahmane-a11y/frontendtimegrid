@@ -70,7 +70,7 @@ onMounted(async () => {
 }
 
 .toast-notification.toast-success {
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .toast-notification.toast-success::before {
@@ -80,7 +80,7 @@ onMounted(async () => {
   justify-content: center;
   width: 24px;
   height: 24px;
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border-radius: 50%;
   font-size: 12px;

@@ -1812,7 +1812,7 @@ onUnmounted(async () => {
 
 .progress-fill {
   height: 100%;
-  background: #42b883;
+  background: #006e5b;
   border-radius: 4px;
   transition: width 0.3s;
 }
@@ -1850,7 +1850,7 @@ onUnmounted(async () => {
 }
 
 .task-item.active {
-  background: #42b883;
+  background: #006e5b;
 }
 
 .task-item.completed {
@@ -1876,11 +1876,11 @@ onUnmounted(async () => {
 
 .task-item.active .task-icon {
   background: white;
-  color: #42b883;
+  color: #006e5b;
 }
 
 .task-item.completed .task-icon {
-  background: #42b883;
+  background: #006e5b;
 }
 
 .check {
@@ -1967,7 +1967,7 @@ onUnmounted(async () => {
 }
 
 .btn-start {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -1979,7 +1979,7 @@ onUnmounted(async () => {
 }
 
 .btn-start:hover {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-2px);
 }
 
@@ -2019,7 +2019,7 @@ onUnmounted(async () => {
 }
 
 .completed-message {
-  background: rgba(66, 184, 131, 0.1);
+  background: rgba(0, 110, 91, 0.1);
 }
 
 .rejected-message {
@@ -2032,7 +2032,7 @@ onUnmounted(async () => {
   margin-bottom: 1rem;
 }
 
-.completed-message .check-icon { color: #42b883; }
+.completed-message .check-icon { color: #006e5b; }
 .rejected-message .warning-icon { color: #ef4444; }
 
 .comment {
@@ -2100,7 +2100,7 @@ onUnmounted(async () => {
 
 .form-group input:focus, .form-group select:focus {
   outline: none;
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .form-group small {
@@ -2160,7 +2160,7 @@ onUnmounted(async () => {
 }
 
 .file-upload:hover {
-  border-color: #42b883;
+  border-color: #006e5b;
 }
 
 .file-upload input[type="file"] {
@@ -2189,7 +2189,7 @@ onUnmounted(async () => {
 }
 
 .file-name {
-  color: #42b883;
+  color: #006e5b;
 }
 
 .file-remove {
@@ -2449,7 +2449,7 @@ onUnmounted(async () => {
 }
 
 .btn-submit {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -2461,7 +2461,7 @@ onUnmounted(async () => {
 }
 
 .btn-submit:hover:not(:disabled) {
-  background: #359268;
+  background: #005a4a;
 }
 
 .btn-submit:disabled {
@@ -2490,7 +2490,7 @@ onUnmounted(async () => {
 .success-icon {
   width: 80px;
   height: 80px;
-  background: #42b883;
+  background: #006e5b;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -2516,7 +2516,7 @@ onUnmounted(async () => {
 }
 
 .btn-continue {
-  background: #42b883;
+  background: #006e5b;
   color: white;
   border: none;
   padding: 1rem 2rem;
@@ -2529,7 +2529,7 @@ onUnmounted(async () => {
 }
 
 .btn-continue:hover {
-  background: #359268;
+  background: #005a4a;
   transform: translateY(-2px);
 }
 
